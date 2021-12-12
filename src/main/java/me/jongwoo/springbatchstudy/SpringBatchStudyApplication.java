@@ -50,13 +50,14 @@ public class SpringBatchStudyApplication {
     @Bean
     public Step step(){
         return this.stepBuilderFactory.get("step1")
-                .tasklet(helloWorldTasklet(null)).build();
+                .tasklet(helloWorldTasklet(null, null)).build();
     }
 
     @StepScope // 늦은 바인딩을 이용한 잡 파라미터 주입
     @Bean
     public Tasklet helloWorldTasklet(
-            @Value("#{jobParameters['name']}") String name) {
+            @Value("#{jobParameters['name']}") String name,
+            @Value("#{jobParameters['fileName']}") String fileName) {
         return (stepContribution, chunkContext) -> {
 //            String name = (String) chunkContext.getStepContext()
 //                    .getJobParameters()
