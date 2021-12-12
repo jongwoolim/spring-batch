@@ -43,6 +43,7 @@ public class SpringBatchStudyApplication {
     public Job job(){
         return this.jobBuilderFactory.get("job")
                 .start(step())
+                .validator(validator())
                 .build();
     }
 
