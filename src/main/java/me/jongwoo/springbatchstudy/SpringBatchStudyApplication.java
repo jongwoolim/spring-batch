@@ -11,6 +11,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -44,6 +45,7 @@ public class SpringBatchStudyApplication {
         return this.jobBuilderFactory.get("job")
                 .start(step())
                 .validator(validator())
+                .incrementer(new RunIdIncrementer()) // 잡 파라미터 증가시키기
                 .build();
     }
 
@@ -64,6 +66,8 @@ public class SpringBatchStudyApplication {
 //                    .get("name");
 
             System.out.println(String.format("hello, %s!,", name));
+            System.out.println("fileName: " + fileName);
+
 
             return RepeatStatus.FINISHED;
         };
@@ -77,7 +81,9 @@ public class SpringBatchStudyApplication {
                 new CompositeJobParametersValidator();
 
         DefaultJobParametersValidator defaultJobParametersValidator =
-                new DefaultJobParametersValidator(new String[]{"fileName"},new String[]{"name"});
+                new DefaultJobParametersValidator(
+                        new String[]{"fileName"},
+                        new String[]{"name", "run.id"});
 
         defaultJobParametersValidator.afterPropertiesSet();
 
