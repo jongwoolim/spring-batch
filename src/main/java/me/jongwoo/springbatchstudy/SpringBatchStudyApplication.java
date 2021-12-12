@@ -1,12 +1,14 @@
 package me.jongwoo.springbatchstudy;
 
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -61,6 +63,16 @@ public class SpringBatchStudyApplication {
         };
 
 
+    }
+
+    @Bean
+    public JobParametersValidator validator(){
+        DefaultJobParametersValidator validator = new DefaultJobParametersValidator();
+
+        validator.setRequiredKeys(new String[]{"fileName"});
+        validator.setOptionalKeys(new String[]{"name"});
+
+        return validator;
     }
 
 
