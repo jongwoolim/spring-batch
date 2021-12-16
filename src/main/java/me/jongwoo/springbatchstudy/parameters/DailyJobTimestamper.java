@@ -1,4 +1,4 @@
-package me.jongwoo.springbatchstudy.parameter;
+package me.jongwoo.springbatchstudy.parameters;
 
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
