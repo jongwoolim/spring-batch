@@ -10,6 +10,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +41,9 @@ public class SpringBatchStudyApplication {
         return this.jobBuilderFactory.get("job")
                 .start(step())
                 .validator(validator())
-//                .incrementer(new RunIdIncrementer()) // 잡 파라미터 증가시키기
-                .incrementer(new DailyJobTimestamper()) // 타임스탬프 파라미터
+                .incrementer(new RunIdIncrementer()) // 잡 파라미터 증가시키기
+//                .incrementer(new DailyJobTimestamper()) // 타임스탬프 파라미터
+                .listener(new JobLoggerListener())
                 .build();
     }
 
@@ -80,7 +82,7 @@ public class SpringBatchStudyApplication {
         DefaultJobParametersValidator defaultJobParametersValidator =
                 new DefaultJobParametersValidator(
                         new String[]{"fileName"},
-                        new String[]{"name", "currentDate"});
+                        new String[]{"name", "run.id"});
 
 
         defaultJobParametersValidator.afterPropertiesSet();
