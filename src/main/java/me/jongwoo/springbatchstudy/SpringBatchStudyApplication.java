@@ -50,23 +50,27 @@ public class SpringBatchStudyApplication {
     @Bean
     public Step methodInvokingStep() {
         return this.stepBuilderFactory.get("methodInvokingStep")
-                .tasklet(methodInvokingTasklet())
+                .tasklet(methodInvokingTasklet(null))
                 .build();
     }
 
     @Bean
-    public Tasklet methodInvokingTasklet() {
+    @StepScope
+    public Tasklet methodInvokingTasklet(
+            @Value("#{jobParameters['message']}") String message) {
         MethodInvokingTaskletAdapter methodInvokingTaskletAdapter =
                 new MethodInvokingTaskletAdapter();
 
         methodInvokingTaskletAdapter.setTargetObject(service());
         methodInvokingTaskletAdapter.setTargetMethod("serviceMethod");
+        methodInvokingTaskletAdapter.setArguments(new String[]{message});
 
         return methodInvokingTaskletAdapter;
     }
 
     @Bean
     public CustomService service(){
+
         return new CustomService();
     }
 
@@ -150,7 +154,7 @@ public class SpringBatchStudyApplication {
         DefaultJobParametersValidator defaultJobParametersValidator =
                 new DefaultJobParametersValidator(
                         new String[]{"fileName"},
-                        new String[]{"name", "run.id"});
+                        new String[]{"name", "run.id", "message"});
 
 
         defaultJobParametersValidator.afterPropertiesSet();
