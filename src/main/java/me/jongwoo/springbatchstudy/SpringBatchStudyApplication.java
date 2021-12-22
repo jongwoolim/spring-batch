@@ -1,6 +1,6 @@
 package me.jongwoo.springbatchstudy;
 
-import me.jongwoo.springbatchstudy.parameters.DailyJobTimestamper;
+import me.jongwoo.springbatchstudy.service.CustomService;
 import me.jongwoo.springbatchstudy.validator.ParameterValidator;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,6 +12,7 @@ import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.tasklet.CallableTaskletAdapter;
+import org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
+
 
 @EnableBatchProcessing
 @SpringBootApplication
@@ -39,6 +41,36 @@ public class SpringBatchStudyApplication {
     }
 
     @Bean
+    public Job methodInvokingJob(){
+        return this.jobBuilderFactory.get("methodInvokingJob")
+                .start(methodInvokingStep())
+                .build();
+    }
+
+    @Bean
+    public Step methodInvokingStep() {
+        return this.stepBuilderFactory.get("methodInvokingStep")
+                .tasklet(methodInvokingTasklet())
+                .build();
+    }
+
+    @Bean
+    public Tasklet methodInvokingTasklet() {
+        MethodInvokingTaskletAdapter methodInvokingTaskletAdapter =
+                new MethodInvokingTaskletAdapter();
+
+        methodInvokingTaskletAdapter.setTargetObject(service());
+        methodInvokingTaskletAdapter.setTargetMethod("serviceMethod");
+
+        return methodInvokingTaskletAdapter;
+    }
+
+    @Bean
+    public CustomService service(){
+        return new CustomService();
+    }
+
+    @Bean
     public Job callableJob(){
         return this.jobBuilderFactory.get("callableJob")
                 .start(callableStep())
@@ -53,6 +85,14 @@ public class SpringBatchStudyApplication {
     }
 
     @Bean
+    public Callable<RepeatStatus> callableObject() {
+        return () -> {
+            System.out.println("This was executed in another thread");
+            return RepeatStatus.FINISHED;
+        };
+    }
+
+    @Bean
     public CallableTaskletAdapter callableTasklet() {
         CallableTaskletAdapter callableTaskletAdapter =
                 new CallableTaskletAdapter();
@@ -63,13 +103,6 @@ public class SpringBatchStudyApplication {
         return callableTaskletAdapter;
     }
 
-    @Bean
-    public Callable<RepeatStatus> callableObject() {
-        return () -> {
-            System.out.println("This was executed in another thread");
-            return RepeatStatus.FINISHED;
-        };
-    }
 
     @Bean
     public Job job(){
