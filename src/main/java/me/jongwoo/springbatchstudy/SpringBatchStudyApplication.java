@@ -11,6 +11,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.step.tasklet.CallableTaskletAdapter;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 
 @EnableBatchProcessing
 @SpringBootApplication
@@ -34,6 +36,39 @@ public class SpringBatchStudyApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringBatchStudyApplication.class, args);
 
+    }
+
+    @Bean
+    public Job callableJob(){
+        return this.jobBuilderFactory.get("callableJob")
+                .start(callableStep())
+                .build();
+    }
+
+    @Bean
+    public Step callableStep() {
+        return this.stepBuilderFactory.get("callableStep")
+                .tasklet(callableTasklet())
+                .build();
+    }
+
+    @Bean
+    public CallableTaskletAdapter callableTasklet() {
+        CallableTaskletAdapter callableTaskletAdapter =
+                new CallableTaskletAdapter();
+
+        // CallableTaskletAdapter 은 callable 객체에 대한 단일 의존성만 필요
+        callableTaskletAdapter.setCallable(callableObject());
+
+        return callableTaskletAdapter;
+    }
+
+    @Bean
+    public Callable<RepeatStatus> callableObject() {
+        return () -> {
+            System.out.println("This was executed in another thread");
+            return RepeatStatus.FINISHED;
+        };
     }
 
     @Bean
