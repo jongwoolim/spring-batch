@@ -13,6 +13,7 @@ import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.step.tasklet.CallableTaskletAdapter;
 import org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter;
+import org.springframework.batch.core.step.tasklet.SystemCommandTasklet;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,6 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
-
 
 @EnableBatchProcessing
 @SpringBootApplication
@@ -38,6 +38,31 @@ public class SpringBatchStudyApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringBatchStudyApplication.class, args);
 
+    }
+
+    @Bean
+    public Job systemCommandJob(){
+        return this.jobBuilderFactory.get("systemCommandJob")
+                .start(systemCommandStep())
+                .build();
+    }
+
+    @Bean
+    public Step systemCommandStep() {
+        return this.stepBuilderFactory.get("systemCommandStep")
+                .tasklet(systemCommandTasklet())
+                .build();
+    }
+
+    @Bean
+    public SystemCommandTasklet systemCommandTasklet() {
+        SystemCommandTasklet systemCommandTasklet = new SystemCommandTasklet();
+
+        systemCommandTasklet.setCommand("rm -rf /tmp.txt");
+        systemCommandTasklet.setTimeout(5000);
+        systemCommandTasklet.setInterruptOnCancel(true);
+
+        return systemCommandTasklet;
     }
 
     @Bean
@@ -106,7 +131,6 @@ public class SpringBatchStudyApplication {
 
         return callableTaskletAdapter;
     }
-
 
     @Bean
     public Job job(){
