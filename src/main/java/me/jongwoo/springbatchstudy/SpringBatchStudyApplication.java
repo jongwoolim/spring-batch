@@ -11,16 +11,14 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.step.tasklet.CallableTaskletAdapter;
-import org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter;
-import org.springframework.batch.core.step.tasklet.SystemCommandTasklet;
-import org.springframework.batch.core.step.tasklet.Tasklet;
+import org.springframework.batch.core.step.tasklet.*;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 import java.util.Arrays;
 import java.util.concurrent.Callable;
@@ -58,11 +56,22 @@ public class SpringBatchStudyApplication {
     public SystemCommandTasklet systemCommandTasklet() {
         SystemCommandTasklet systemCommandTasklet = new SystemCommandTasklet();
 
-        systemCommandTasklet.setCommand("rm -rf /tmp.txt");
+        systemCommandTasklet.setCommand("touch /tmp.txt");
+
+        systemCommandTasklet.setWorkingDirectory("/users/limjongwoo/batch");
+        systemCommandTasklet.setSystemProcessExitCodeMapper(touchCodeMapper());
         systemCommandTasklet.setTimeout(5000);
+        systemCommandTasklet.setTaskExecutor(new SimpleAsyncTaskExecutor());
+//        systemCommandTasklet.setEnvironmentParams(new String[]{
+//                "JAVA_HOME=/java", "BATCH_HOME=/Users/batch"});
         systemCommandTasklet.setInterruptOnCancel(true);
 
         return systemCommandTasklet;
+    }
+
+    @Bean
+    public SystemProcessExitCodeMapper touchCodeMapper() {
+        return new SimpleSystemProcessExitCodeMapper();
     }
 
     @Bean
