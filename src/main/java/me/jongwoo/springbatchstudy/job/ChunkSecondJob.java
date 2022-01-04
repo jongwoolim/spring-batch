@@ -13,6 +13,10 @@ import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.batch.item.file.mapping.PassThroughLineMapper;
 import org.springframework.batch.item.file.transform.PassThroughLineAggregator;
 import org.springframework.batch.item.support.ListItemReader;
+import org.springframework.batch.repeat.CompletionPolicy;
+import org.springframework.batch.repeat.policy.CompositeCompletionPolicy;
+import org.springframework.batch.repeat.policy.SimpleCompletionPolicy;
+import org.springframework.batch.repeat.policy.TimeoutTerminationPolicy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,11 +43,26 @@ public class ChunkSecondJob {
 
     public Step chunkSecondStep() {
         return this.stepBuilderFactory.get("chunkStep")
-                .<String, String>chunk(1000) // 커밋 간격 하드 코딩은 모든 상황에 적절하지 않음..
+                .<String, String>chunk(completionPolicy()) // 커밋 간격 하드 코딩은 모든 상황에 적절하지 않음..
                 .reader(itemSecondReader())
                 .writer(itemSecondWriter())
                 .build()
                 ;
+    }
+
+    @Bean
+    public CompletionPolicy completionPolicy() {
+        CompositeCompletionPolicy policy =
+                new CompositeCompletionPolicy();
+
+        policy.setPolicies(
+                new CompletionPolicy[]{
+                        new TimeoutTerminationPolicy(3),
+                        new SimpleCompletionPolicy(1000)
+                }
+        );
+
+        return policy;
     }
 
     @Bean
