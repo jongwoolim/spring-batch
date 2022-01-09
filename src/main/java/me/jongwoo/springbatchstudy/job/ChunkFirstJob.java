@@ -8,6 +8,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
 import org.springframework.batch.item.file.mapping.PassThroughLineMapper;
@@ -27,13 +28,14 @@ public class ChunkFirstJob {
 
     @Bean
     public Job chunkFirstTestJob(){
-        return this.jobBuilderFactory.get("chunkBasedJob")
+        return this.jobBuilderFactory.get("chunkBasedJob1")
                 .start(chunkFirstStep())
                 .build();
     }
 
+    @Bean
     public Step chunkFirstStep() {
-        return this.stepBuilderFactory.get("chunkStep")
+        return this.stepBuilderFactory.get("chunkStep1")
                 .<String, String>chunk(10) // 커밋 간격 10 -> 10개 단위로 레코드 처리한 후 작업 커밋
                 .reader(itemReader(null))
                 .writer(itemWriter(null))
@@ -55,7 +57,7 @@ public class ChunkFirstJob {
 
     @Bean
     @StepScope
-    public ItemWriter<? super String> itemWriter(
+    public FlatFileItemWriter<String> itemWriter(
             @Value("#{jobParameters['outputFile']}") Resource outputFile) {
 
         return new FlatFileItemWriterBuilder<String>()

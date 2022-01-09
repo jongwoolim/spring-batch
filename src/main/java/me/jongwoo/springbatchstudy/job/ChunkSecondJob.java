@@ -1,6 +1,7 @@
 package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
+import me.jongwoo.springbatchstudy.policy.RandomChunkSizePolicy;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -36,18 +37,25 @@ public class ChunkSecondJob {
 
     @Bean
     public Job chunkSecondTestJob(){
-        return this.jobBuilderFactory.get("chunkBasedJob")
+        return this.jobBuilderFactory.get("chunkBasedJob2")
                 .start(chunkSecondStep())
                 .build();
     }
 
+    @Bean
     public Step chunkSecondStep() {
-        return this.stepBuilderFactory.get("chunkStep")
-                .<String, String>chunk(completionPolicy()) // 커밋 간격 하드 코딩은 모든 상황에 적절하지 않음..
+        return this.stepBuilderFactory.get("chunkStep2")
+//                .<String, String>chunk(completionPolicy()) // 커밋 간격 하드 코딩은 모든 상황에 적절하지 않음..
+                .<String, String>chunk(randomCompletionPolicy())
                 .reader(itemSecondReader())
                 .writer(itemSecondWriter())
                 .build()
                 ;
+    }
+
+    @Bean
+    public CompletionPolicy randomCompletionPolicy(){
+        return new RandomChunkSizePolicy();
     }
 
     @Bean
@@ -68,9 +76,9 @@ public class ChunkSecondJob {
     @Bean
     public ListItemReader<String> itemSecondReader() {
 
-        List<String> items = new ArrayList<>(100000);
+        List<String> items = new ArrayList<>(40);
 
-        for(int i = 0; i< 100000; i++){
+        for(int i = 0; i< 40; i++){
             items.add(UUID.randomUUID().toString());
         }
 
