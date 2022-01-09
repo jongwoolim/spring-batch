@@ -1,5 +1,6 @@
 package me.jongwoo.springbatchstudy;
 
+import me.jongwoo.springbatchstudy.listener.JobLoggerListener;
 import me.jongwoo.springbatchstudy.validator.ParameterValidator;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;

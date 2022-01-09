@@ -1,4 +1,4 @@
-package me.jongwoo.springbatchstudy;
+package me.jongwoo.springbatchstudy.listener;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;

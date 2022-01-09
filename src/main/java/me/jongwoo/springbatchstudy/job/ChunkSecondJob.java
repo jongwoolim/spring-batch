@@ -1,6 +1,7 @@
 package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
+import me.jongwoo.springbatchstudy.listener.LoggingStepStartStopListener;
 import me.jongwoo.springbatchstudy.policy.RandomChunkSizePolicy;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -49,6 +50,7 @@ public class ChunkSecondJob {
                 .<String, String>chunk(randomCompletionPolicy())
                 .reader(itemSecondReader())
                 .writer(itemSecondWriter())
+                .listener(new LoggingStepStartStopListener())
                 .build()
                 ;
     }
