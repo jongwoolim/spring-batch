@@ -37,62 +37,62 @@ public class SpringBatchStudyApplication {
     }
 
 
-    @Bean
-    public Job job(){
-        return this.jobBuilderFactory.get("job")
-                .start(step())
-                .validator(validator())
-                .incrementer(new RunIdIncrementer()) // 잡 파라미터 증가시키기
-//                .incrementer(new DailyJobTimestamper()) // 타임스탬프 파라미터
-                .listener(new JobLoggerListener())
-                .build();
-    }
-
-    @Bean
-    public Step step(){
-        return this.stepBuilderFactory.get("step1")
-                .tasklet(helloWorldTasklet(null, null)).build();
-    }
-
-    @StepScope // 늦은 바인딩을 이용한 잡 파라미터 주입
-    @Bean
-    public Tasklet helloWorldTasklet(
-            @Value("#{jobParameters['name']}") String name,
-            @Value("#{jobParameters['fileName']}") String fileName) {
-        return (stepContribution, chunkContext) -> {
-//            String name = (String) chunkContext.getStepContext()
-//                    .getJobParameters()
-//                    .get("name");
-
-            System.out.println(String.format("hello, %s!,", name));
-            System.out.println("fileName: " + fileName);
-
-
-            return RepeatStatus.FINISHED;
-        };
-
-
-    }
-
-    @Bean
-    public CompositeJobParametersValidator validator(){
-        CompositeJobParametersValidator validator =
-                new CompositeJobParametersValidator();
-
-
-        DefaultJobParametersValidator defaultJobParametersValidator =
-                new DefaultJobParametersValidator(
-                        new String[]{"fileName"},
-                        new String[]{"name", "run.id", "message"});
-
-
-        defaultJobParametersValidator.afterPropertiesSet();
-
-        validator.setValidators(
-                Arrays.asList(new ParameterValidator(), defaultJobParametersValidator));
-
-        return validator;
-    }
+//    @Bean
+//    public Job job(){
+//        return this.jobBuilderFactory.get("job")
+//                .start(step())
+//                .validator(validator())
+//                .incrementer(new RunIdIncrementer()) // 잡 파라미터 증가시키기
+////                .incrementer(new DailyJobTimestamper()) // 타임스탬프 파라미터
+//                .listener(new JobLoggerListener())
+//                .build();
+//    }
+//
+//    @Bean
+//    public Step step(){
+//        return this.stepBuilderFactory.get("step1")
+//                .tasklet(helloWorldTasklet(null, null)).build();
+//    }
+//
+//    @StepScope // 늦은 바인딩을 이용한 잡 파라미터 주입
+//    @Bean
+//    public Tasklet helloWorldTasklet(
+//            @Value("#{jobParameters['name']}") String name,
+//            @Value("#{jobParameters['fileName']}") String fileName) {
+//        return (stepContribution, chunkContext) -> {
+////            String name = (String) chunkContext.getStepContext()
+////                    .getJobParameters()
+////                    .get("name");
+//
+//            System.out.println(String.format("hello, %s!,", name));
+//            System.out.println("fileName: " + fileName);
+//
+//
+//            return RepeatStatus.FINISHED;
+//        };
+//
+//
+//    }
+//
+//    @Bean
+//    public CompositeJobParametersValidator validator(){
+//        CompositeJobParametersValidator validator =
+//                new CompositeJobParametersValidator();
+//
+//
+//        DefaultJobParametersValidator defaultJobParametersValidator =
+//                new DefaultJobParametersValidator(
+//                        new String[]{"fileName"},
+//                        new String[]{"name", "run.id", "message"});
+//
+//
+//        defaultJobParametersValidator.afterPropertiesSet();
+//
+//        validator.setValidators(
+//                Arrays.asList(new ParameterValidator(), defaultJobParametersValidator));
+//
+//        return validator;
+//    }
 
 //    @Bean
 //    public JobParametersValidator validator(){
