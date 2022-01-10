@@ -60,10 +60,10 @@ public class ConditionalJob {
     public Job conditionalTestJob(){
         return this.jobBuilderFactory.get("conditionalJob")
                 .start(firstStep())
-                .on("FAILED")
-                .fail()
+                .on("FAILED").stopAndRestart(successStep())
 //                .end()
-                .from(firstStep()).on("*").to(successStep())
+                .from(firstStep())
+                .on("*").to(successStep())
                 .end()
                 .build();
 //                .next(decider())
