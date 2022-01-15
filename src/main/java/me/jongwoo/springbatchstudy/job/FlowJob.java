@@ -57,6 +57,7 @@ public class FlowJob {
     public Flow preProcessingFlow(){
         return new FlowBuilder<Flow>("preProcessingFlow")
                 .start(loadFileStep())
+                .next(loadCustomerStep())
                 .next(updateStartStep())
                 .build();
     }
