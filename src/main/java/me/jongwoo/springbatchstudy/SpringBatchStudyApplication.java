@@ -8,6 +8,7 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.job.CompositeJobParametersValidator;
 import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
@@ -31,11 +32,34 @@ public class SpringBatchStudyApplication {
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
+    @Autowired
+    private JobExplorer jobExplorer;
+
     public static void main(String[] args) {
         SpringApplication.run(SpringBatchStudyApplication.class, args);
 
     }
 
+    @Bean
+    public Tasklet explorerTaskelet(){
+        return new ExplorerTasklet(this.jobExplorer);
+    }
+
+
+    @Bean
+    public Step explorerStep(){
+        return this.stepBuilderFactory.get("explorerStep")
+                .tasklet(explorerTaskelet())
+                .build();
+    }
+
+
+    @Bean
+    public Job explorerJob(){
+        return this.jobBuilderFactory.get("explorerJob")
+                .start(explorerStep())
+                .build();
+    }
 
 //    @Bean
 //    public Job job(){
