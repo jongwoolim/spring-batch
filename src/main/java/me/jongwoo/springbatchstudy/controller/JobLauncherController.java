@@ -31,6 +31,7 @@ public class JobLauncherController {
 
     public static class JobLaunchRequest{
         private String name;
+
         private Properties jobParameters;
 
         public String getName() {

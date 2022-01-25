@@ -18,15 +18,15 @@ public class RestJob {
     private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job restJob(){
+    public Job restTestJob(){
         return this.jobBuilderFactory.get("rest job")
                 .incrementer(new RunIdIncrementer())
-                .start(restStep())
+                .start(restTestStep())
                 .build();
     }
 
     @Bean
-    public Step restStep() {
+    public Step restTestStep() {
         return this.stepBuilderFactory.get("rest step")
                 .tasklet((stepContribution, chunkContext) -> {
                     System.out.println("step 1 ran today !!!");
