@@ -1,12 +1,15 @@
 package me.jongwoo.springbatchstudy.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @NoArgsConstructor
@@ -20,7 +23,7 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "account_summary_id")
     private AccountSummary accountSummary;
-    private LocalDate timestamp;
+    private Date timestamp;
     private Double amount;
 
 }
