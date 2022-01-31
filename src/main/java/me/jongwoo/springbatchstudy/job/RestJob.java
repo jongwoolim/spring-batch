@@ -21,7 +21,6 @@ public class RestJob {
     public Job restTestJob(){
         return this.jobBuilderFactory.get("rest job")
                 .incrementer(new RunIdIncrementer())
-                .incrementer(new RunIdIncrementer())
                 .start(restTestStep())
                 .build();
     }
