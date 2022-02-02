@@ -1,6 +1,5 @@
 package me.jongwoo.springbatchstudy.job;
 
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.domain.AccountSummary;
 import me.jongwoo.springbatchstudy.domain.Transaction;
@@ -8,17 +7,16 @@ import me.jongwoo.springbatchstudy.processor.TransactionApplierProcessor;
 import me.jongwoo.springbatchstudy.reader.TransactionReader;
 import me.jongwoo.springbatchstudy.repository.TransactionDao;
 import me.jongwoo.springbatchstudy.repository.TransactionDaoSupport;
-import me.jongwoo.springbatchstudy.repository.TransactionRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.database.*;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
-import org.springframework.batch.item.database.builder.JpaCursorItemReaderBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -32,10 +30,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 @Configuration
@@ -53,7 +49,7 @@ public class TransactionJob {
     @Bean
     @StepScope
     public TransactionReader transactionReader(){
-        return new TransactionReader(fileItemReader());
+        return new TransactionReader(fileItemReader(null));
     }
 
     @Bean
@@ -61,7 +57,6 @@ public class TransactionJob {
 
         return this.jobBuilderFactory.get("transactionFileJob")
                 .start(importTransactionFileStep())
-
                     .on("STOPPED")
                     .stopAndRestart(importTransactionFileStep()) // 잡이 프로그래밍 방식으로 중지된 경우 잡을 다시 시작
                 .from(importTransactionFileStep())
@@ -89,11 +84,11 @@ public class TransactionJob {
     @Bean
     @StepScope
     public FlatFileItemReader<FieldSet> fileItemReader(
-//            @Value("#{jobParameters['transactionFile']}") Resource inputFile
+            @Value("#{jobParameters['transactionFile']}") String inputFile
     ){
         return new FlatFileItemReaderBuilder<FieldSet>()
                 .name("fileItemReader")
-                .resource(new ClassPathResource("input/transaction.csv"))
+                .resource(new ClassPathResource(inputFile))
                 .lineTokenizer(new DelimitedLineTokenizer())
                 .fieldSetMapper(new PassThroughFieldSetMapper())
                 .build();
@@ -123,20 +118,22 @@ public class TransactionJob {
     // 스텝 2 파일에서 찾은 거래 정보를 계좌에 적용
     @Bean
     @StepScope
-    public JdbcCursorItemReader<AccountSummary> accountSummaryReader(DataSource dataSource){
+    public JdbcCursorItemReader<AccountSummary> accountSummaryReader(DataSource dataSource) {
         return new JdbcCursorItemReaderBuilder<AccountSummary>()
                 .name("accountSummaryReader")
                 .dataSource(dataSource)
                 .sql("SELECT ACCOUNT_NUMBER, CURRENT_BALANCE " +
                         "FROM ACCOUNT_SUMMARY A " +
                         "WHERE A.ID IN (" +
-                        "   SELECT DISTINCT T.ACCOUNT_SUMMARY_ID " +
-                        "   FROM TRANSACTION T " +
+                        "	SELECT DISTINCT T.ACCOUNT_SUMMARY_ID " +
+                        "	FROM TRANSACTION T) " +
                         "ORDER BY A.ACCOUNT_NUMBER")
-                .rowMapper((rs, rowNum) -> {
+                .rowMapper((resultSet, rowNumber) -> {
                     AccountSummary summary = new AccountSummary();
-                    summary.setAccountNumber(rs.getString("account_number"));
-                    summary.setCurrentBalance(rs.getDouble("current_balance"));
+
+                    summary.setAccountNumber(resultSet.getString("account_number"));
+                    summary.setCurrentBalance(resultSet.getDouble("current_balance"));
+
                     return summary;
                 }).build();
     }

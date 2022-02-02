@@ -3,7 +3,6 @@ package me.jongwoo.springbatchstudy.processor;
 import me.jongwoo.springbatchstudy.domain.AccountSummary;
 import me.jongwoo.springbatchstudy.domain.Transaction;
 import me.jongwoo.springbatchstudy.repository.TransactionDao;
-import me.jongwoo.springbatchstudy.repository.TransactionRepository;
 import org.springframework.batch.item.ItemProcessor;
 
 import java.util.List;
