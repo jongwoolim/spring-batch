@@ -56,6 +56,7 @@ public class TransactionJob {
     public Job transactionFileJob(){
 
         return this.jobBuilderFactory.get("transactionFileJob")
+                .preventRestart()
                 // @BeforeStep를 통해 setTerminateOnly 준 경우
                 .start(importTransactionFileStep())
                 .next(applyTransactionStep())
