@@ -82,7 +82,7 @@ public class TransactionJob {
                 .<Transaction, Transaction>chunk(100)
                 .reader(transactionReader())
                 .writer(transactionWriter(null))
-                .allowStartIfComplete(true)
+                .allowStartIfComplete(true) // 재시작 가능한 잡일 때 완료된 스텝을 재실행할 수 있어야 하는 것을 알림(ex 유효성 검증 및 배치 전 리소스 정리)
                 .listener(transactionReader())
                 .build();
     }
