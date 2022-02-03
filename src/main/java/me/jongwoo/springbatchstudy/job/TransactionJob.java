@@ -56,16 +56,21 @@ public class TransactionJob {
     public Job transactionFileJob(){
 
         return this.jobBuilderFactory.get("transactionFileJob")
+                // @BeforeStep를 통해 setTerminateOnly 준 경우
                 .start(importTransactionFileStep())
-                    .on("STOPPED")
-                    .stopAndRestart(importTransactionFileStep()) // 잡이 프로그래밍 방식으로 중지된 경우 잡을 다시 시작
-                .from(importTransactionFileStep())
-                    .on("*")
-                    .to(applyTransactionStep())
-                .from(applyTransactionStep())
-                    .next(generateAccountSummaryStep())
-                .end()
+                .next(applyTransactionStep())
+                .next(generateAccountSummaryStep())
                 .build();
+//                .start(importTransactionFileStep())
+//                    .on("STOPPED")
+//                    .stopAndRestart(importTransactionFileStep()) // 잡이 프로그래밍 방식으로 중지된 경우 잡을 다시 시작
+//                .from(importTransactionFileStep())
+//                    .on("*")
+//                    .to(applyTransactionStep())
+//                .from(applyTransactionStep())
+//                    .next(generateAccountSummaryStep())
+//                .end()
+//                .build();
     }
 
     // 스텝 1 파일에서 데이터를 읽어 db에 저장
