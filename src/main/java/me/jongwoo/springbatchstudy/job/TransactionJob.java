@@ -56,7 +56,7 @@ public class TransactionJob {
     public Job transactionFileJob(){
 
         return this.jobBuilderFactory.get("transactionFileJob")
-                .preventRestart()
+//                .preventRestart()
                 // @BeforeStep를 통해 setTerminateOnly 준 경우
                 .start(importTransactionFileStep())
                 .next(applyTransactionStep())
@@ -78,6 +78,7 @@ public class TransactionJob {
     @Bean
     public Step importTransactionFileStep() {
         return this.stepBuilderFactory.get("importTransactionFileStep")
+                .startLimit(2) // 파일 가져오기 두 번만 시도하도록
                 .<Transaction, Transaction>chunk(100)
                 .reader(transactionReader())
                 .writer(transactionWriter(null))
