@@ -23,6 +23,9 @@ public class TransactionReader implements ItemStreamReader<Transaction> {
 
     @Override
     public Transaction read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+        if(recordCount == 25){
+            throw new ParseException("This isn`t what i hoped to happen");
+        }
         return process(fieldSetReader.read());
     }
 
