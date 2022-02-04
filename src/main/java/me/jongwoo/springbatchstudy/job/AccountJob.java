@@ -1,6 +1,7 @@
 package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
+import me.jongwoo.springbatchstudy.AccountFileLineTokenizer;
 import me.jongwoo.springbatchstudy.AccountFileSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
 import org.springframework.batch.core.Job;
@@ -50,14 +51,15 @@ public class AccountJob {
         return new FlatFileItemReaderBuilder<Account>()
                 .name("accountItemReader")
                 .resource(new ClassPathResource(inputFile))
-                .delimited()
+                .lineTokenizer(new AccountFileLineTokenizer()) // 특이한 파일 포맷 파싱, 엑셀 워크시트 같은 서드파티 파일 포맷, 특수한 타입 변환 요구 조건 처리 시 사용
+//                .delimited()
                 //고정 너비 파일일 경우
 //                .fixedLength()
 //                .columns(new Range[]{new Range(1,11), new Range(12,12),new Range(13,22),
 //                                new Range(23,26),new Range(27,46),new Range(47,62),new Range(63,64),new Range(65,69)})
-                .names("firstName", "middleInitial", "lastName","addressNumber","street","city","state","zipCode")
-                .fieldSetMapper(new AccountFileSetMapper())
-//                .targetType(Account.class)
+//                .names("firstName", "middleInitial", "lastName","addressNumber","street","city","state","zipCode")
+//                .fieldSetMapper(new AccountFileSetMapper())
+                .targetType(Account.class)
                 .build();
 
     }
