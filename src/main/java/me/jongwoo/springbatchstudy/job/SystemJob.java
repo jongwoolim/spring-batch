@@ -21,40 +21,40 @@ public class SystemJob {
 
     private final StepBuilderFactory stepBuilderFactory;
 
-    @Bean
-    public Job systemCommandJob(){
-        return this.jobBuilderFactory.get("systemCommandJob")
-                .start(systemCommandStep())
-                .build();
-    }
-
-    @Bean
-    public Step systemCommandStep() {
-        return this.stepBuilderFactory.get("systemCommandStep")
-                .tasklet(systemCommandTasklet())
-                .build();
-    }
-
-    @Bean
-    public SystemCommandTasklet systemCommandTasklet() {
-        SystemCommandTasklet systemCommandTasklet = new SystemCommandTasklet();
-
-        systemCommandTasklet.setCommand("touch tmp.txt");
-
-        systemCommandTasklet.setWorkingDirectory("/users/limjongwoo/batch");
-        systemCommandTasklet.setSystemProcessExitCodeMapper(touchCodeMapper());
-        systemCommandTasklet.setTimeout(5000);
-        systemCommandTasklet.setTaskExecutor(new SimpleAsyncTaskExecutor());
-//        systemCommandTasklet.setEnvironmentParams(new String[]{
-//                "JAVA_HOME=/java", "BATCH_HOME=/Users/batch"});
-        systemCommandTasklet.setInterruptOnCancel(true);
-
-        return systemCommandTasklet;
-    }
-
-    @Bean
-    public SystemProcessExitCodeMapper touchCodeMapper() {
-        return new SimpleSystemProcessExitCodeMapper();
-    }
+//    @Bean
+//    public Job systemCommandJob(){
+//        return this.jobBuilderFactory.get("systemCommandJob")
+//                .start(systemCommandStep())
+//                .build();
+//    }
+//
+//    @Bean
+//    public Step systemCommandStep() {
+//        return this.stepBuilderFactory.get("systemCommandStep")
+//                .tasklet(systemCommandTasklet())
+//                .build();
+//    }
+//
+//    @Bean
+//    public SystemCommandTasklet systemCommandTasklet() {
+//        SystemCommandTasklet systemCommandTasklet = new SystemCommandTasklet();
+//
+//        systemCommandTasklet.setCommand("touch tmp.txt");
+//
+//        systemCommandTasklet.setWorkingDirectory("/users/limjongwoo/batch");
+//        systemCommandTasklet.setSystemProcessExitCodeMapper(touchCodeMapper());
+//        systemCommandTasklet.setTimeout(5000);
+//        systemCommandTasklet.setTaskExecutor(new SimpleAsyncTaskExecutor());
+////        systemCommandTasklet.setEnvironmentParams(new String[]{
+////                "JAVA_HOME=/java", "BATCH_HOME=/Users/batch"});
+//        systemCommandTasklet.setInterruptOnCancel(true);
+//
+//        return systemCommandTasklet;
+//    }
+//
+//    @Bean
+//    public SystemProcessExitCodeMapper touchCodeMapper() {
+//        return new SimpleSystemProcessExitCodeMapper();
+//    }
 
 }
