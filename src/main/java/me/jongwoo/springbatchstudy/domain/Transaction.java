@@ -1,20 +1,21 @@
 package me.jongwoo.springbatchstudy.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter @Setter
+@Getter @Setter @ToString
 public class Transaction {
 
     private String accountNumber;
-    private Date timestamp;
+    private Date transactionDate;
     private Double amount;
+
+    private DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
 }

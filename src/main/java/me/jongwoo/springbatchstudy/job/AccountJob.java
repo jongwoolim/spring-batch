@@ -3,6 +3,7 @@ package me.jongwoo.springbatchstudy.job;
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.AccountFileLineTokenizer;
 import me.jongwoo.springbatchstudy.AccountFileSetMapper;
+import me.jongwoo.springbatchstudy.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,10 +13,18 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
+import org.springframework.batch.item.file.mapping.FieldSetMapper;
+import org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper;
+import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.batch.item.file.transform.LineTokenizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
@@ -64,6 +73,42 @@ public class AccountJob {
 
     }
 
+    @Bean
+    public PatternMatchingCompositeLineMapper lineTokenizer(){
+        Map<String, LineTokenizer> lineTokenizers = new HashMap<>(2);
+        lineTokenizers.put("CUST*", accountLineTokenizer());
+        lineTokenizers.put("TRANS*", transactionLineTokenizer());
+
+        Map<String, FieldSetMapper> fieldSetMappers = new HashMap<>(2);
+        BeanWrapperFieldSetMapper<Account> accountFieldSetMapper = new BeanWrapperFieldSetMapper<>();
+        fieldSetMappers.put("CUST*", accountFieldSetMapper);
+        fieldSetMappers.put("TRANS*", new TransactionFieldSetMapper());
+
+        PatternMatchingCompositeLineMapper lineMappers =
+                new PatternMatchingCompositeLineMapper();
+
+        lineMappers.setTokenizers(lineTokenizers);
+        lineMappers.setFieldSetMappers(fieldSetMappers);
+
+        return lineMappers;
+    }
+
+    @Bean
+    public DelimitedLineTokenizer transactionLineTokenizer(){
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+        lineTokenizer.setNames("prefix","accountNumber","transactionDate","amount");
+        return lineTokenizer;
+    }
+
+    @Bean
+    public DelimitedLineTokenizer accountLineTokenizer(){
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+
+        lineTokenizer.setNames("firstName","middleInitial","lastName","address","city","state","zipCode");
+
+        lineTokenizer.setIncludedFields(1,2,3,4,5,6,7);
+        return lineTokenizer;
+    }
     @Bean
     public ItemWriter<Account> accountItemWriter(){
         return list -> list.forEach(System.out::println);
