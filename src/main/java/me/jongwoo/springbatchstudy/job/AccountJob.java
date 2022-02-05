@@ -81,6 +81,8 @@ public class AccountJob {
 
         Map<String, FieldSetMapper> fieldSetMappers = new HashMap<>(2);
         BeanWrapperFieldSetMapper<Account> accountFieldSetMapper = new BeanWrapperFieldSetMapper<>();
+        accountFieldSetMapper.setTargetType(Account.class);
+
         fieldSetMappers.put("CUST*", accountFieldSetMapper);
         fieldSetMappers.put("TRANS*", new TransactionFieldSetMapper());
 
