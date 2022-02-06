@@ -13,8 +13,7 @@ public class TransactionFieldSetMapper implements FieldSetMapper<Transaction> {
 
         trans.setAccountNumber(fieldSet.readString("accountNumber"));
         trans.setAmount(fieldSet.readDouble("amount"));
-        trans.setTransactionDate(fieldSet.readDate("transactionDate",
-                "yyyy-MM-dd HH:mm:ss"));
+        trans.setTransactionDate(fieldSet.readDate("transactionDate", "yyyy-MM-dd HH:mm:ss"));
 
         return trans;
     }
