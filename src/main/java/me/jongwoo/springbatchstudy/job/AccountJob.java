@@ -46,7 +46,7 @@ public class AccountJob {
     @Bean
     public Step copyFileStep(){
         return this.stepBuilderFactory.get("copyFileStep")
-                .<Account, Account>chunk(10)
+                .chunk(10)
                 .reader(accountItemReader(null))
                 .writer(accountItemWriter())
                 .build();
@@ -54,13 +54,14 @@ public class AccountJob {
 
     @Bean
     @StepScope
-    public FlatFileItemReader<Account> accountItemReader(
+    public FlatFileItemReader accountItemReader(
             @Value("#{jobParameters['customerFile']}") String inputFile
     ){
         return new FlatFileItemReaderBuilder<Account>()
                 .name("accountItemReader")
                 .resource(new ClassPathResource(inputFile))
-                .lineTokenizer(new AccountFileLineTokenizer()) // 특이한 파일 포맷 파싱, 엑셀 워크시트 같은 서드파티 파일 포맷, 특수한 타입 변환 요구 조건 처리 시 사용
+                .lineMapper(lineTokenizer())
+//                .lineTokenizer(new AccountFileLineTokenizer()) // 특이한 파일 포맷 파싱, 엑셀 워크시트 같은 서드파티 파일 포맷, 특수한 타입 변환 요구 조건 처리 시 사용
 //                .delimited()
                 //고정 너비 파일일 경우
 //                .fixedLength()
@@ -68,7 +69,7 @@ public class AccountJob {
 //                                new Range(23,26),new Range(27,46),new Range(47,62),new Range(63,64),new Range(65,69)})
 //                .names("firstName", "middleInitial", "lastName","addressNumber","street","city","state","zipCode")
 //                .fieldSetMapper(new AccountFileSetMapper())
-                .targetType(Account.class)
+//                .targetType(Account.class)
                 .build();
 
     }
@@ -112,7 +113,7 @@ public class AccountJob {
         return lineTokenizer;
     }
     @Bean
-    public ItemWriter<Account> accountItemWriter(){
+    public ItemWriter accountItemWriter(){
         return list -> list.forEach(System.out::println);
     }
 
