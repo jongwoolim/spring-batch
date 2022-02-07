@@ -3,15 +3,17 @@ package me.jongwoo.springbatchstudy.reader;
 import me.jongwoo.springbatchstudy.domain.Account;
 import me.jongwoo.springbatchstudy.domain.Transaction;
 import org.springframework.batch.item.*;
+import org.springframework.batch.item.file.ResourceAwareItemReaderItemStream;
+import org.springframework.core.io.Resource;
 
 import java.util.ArrayList;
 
-public class AccountFileReader implements ItemStreamReader<Account> {
+public class AccountFileReader implements ResourceAwareItemReaderItemStream<Account> {
 
     private Object curItem = null;
-    private ItemStreamReader<Object> delegate;
+    private ResourceAwareItemReaderItemStream<Object> delegate;
 
-    public AccountFileReader(ItemStreamReader<Object> delegate) {
+    public AccountFileReader(ResourceAwareItemReaderItemStream<Object> delegate) {
         this.delegate = delegate;
     }
 
@@ -58,5 +60,10 @@ public class AccountFileReader implements ItemStreamReader<Account> {
     @Override
     public void close() throws ItemStreamException {
         delegate.close();
+    }
+
+    @Override
+    public void setResource(Resource resource) {
+        this.delegate.setResource(resource);
     }
 }
