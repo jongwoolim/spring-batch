@@ -73,6 +73,7 @@ public class AccountJob {
                 .build();
     }
 
+    // Jaxb2Marshaller 에게 대상 클래스를 알려주도록 작성
      @Bean
      public Jaxb2Marshaller accountMarshaller(){
         Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
