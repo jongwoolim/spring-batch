@@ -1,4 +1,4 @@
-package me.jongwoo.springbatchstudy;
+package me.jongwoo.springbatchstudy.batch;
 
 import org.springframework.batch.item.file.transform.DefaultFieldSetFactory;
 import org.springframework.batch.item.file.transform.FieldSet;

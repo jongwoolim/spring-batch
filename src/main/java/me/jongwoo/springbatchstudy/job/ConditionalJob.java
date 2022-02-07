@@ -1,7 +1,7 @@
 package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
-import me.jongwoo.springbatchstudy.RandomDecider;
+import me.jongwoo.springbatchstudy.batch.RandomDecider;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;

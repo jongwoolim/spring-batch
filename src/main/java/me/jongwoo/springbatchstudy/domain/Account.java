@@ -12,9 +12,10 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-@XmlRootElement
+//@XmlRootElement
 public class Account {
 
+    private Long id;
     private String firstName;
     private String middleInitial;
     private String lastName;
@@ -25,13 +26,13 @@ public class Account {
     private String state;
     private String zipCode;
 
-    private List<Transaction> transactions;
-
-    @XmlElementWrapper(name = "transactions")
-    @XmlElement(name = "transaction")
-    public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
-    }
+//    private List<Transaction> transactions;
+//
+//    @XmlElementWrapper(name = "transactions")
+//    @XmlElement(name = "transaction")
+//    public void setTransactions(List<Transaction> transactions) {
+//        this.transactions = transactions;
+//    }
 
     public Account(){
 

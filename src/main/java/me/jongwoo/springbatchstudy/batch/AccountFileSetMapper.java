@@ -1,4 +1,4 @@
-package me.jongwoo.springbatchstudy;
+package me.jongwoo.springbatchstudy.batch;
 
 import me.jongwoo.springbatchstudy.domain.Account;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
