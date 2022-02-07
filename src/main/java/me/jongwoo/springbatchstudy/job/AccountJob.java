@@ -5,6 +5,7 @@ import me.jongwoo.springbatchstudy.AccountFileLineTokenizer;
 import me.jongwoo.springbatchstudy.AccountFileSetMapper;
 import me.jongwoo.springbatchstudy.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
+import me.jongwoo.springbatchstudy.reader.AccountFileReader;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -47,7 +48,7 @@ public class AccountJob {
     public Step copyFileStep(){
         return this.stepBuilderFactory.get("copyFileStep")
                 .chunk(10)
-                .reader(accountItemReader(null))
+                .reader(accountFileReader())
                 .writer(accountItemWriter())
                 .build();
     }
@@ -72,6 +73,11 @@ public class AccountJob {
 //                .targetType(Account.class)
                 .build();
 
+    }
+
+    @Bean
+    public AccountFileReader accountFileReader(){
+        return new AccountFileReader(accountItemReader(null));
     }
 
     @Bean
