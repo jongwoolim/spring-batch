@@ -1,19 +1,11 @@
 package me.jongwoo.springbatchstudy;
 
-import me.jongwoo.springbatchstudy.domain.Customer;
 import me.jongwoo.springbatchstudy.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class AppRunner implements ApplicationRunner {
@@ -24,8 +16,10 @@ public class AppRunner implements ApplicationRunner {
     @Autowired
     ApplicationContext applicationContext;
 
+
     @Override
     public void run(ApplicationArguments args) throws Exception {
+
 //        Resource[] resources = applicationContext.getResources("classpath:/input/customerMultiFormat*");
 //        List<String> collect = Arrays.stream(resources).map(Resource::getFilename).collect(Collectors.toList());
 //        collect.forEach(System.out::println);

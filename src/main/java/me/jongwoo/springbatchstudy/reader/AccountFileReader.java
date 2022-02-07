@@ -30,11 +30,11 @@ public class AccountFileReader implements ResourceAwareItemReaderItemStream<Acco
         curItem = null;
 
         if(item != null){
-            item.setTransactions(new ArrayList<>());
-            while(peek() instanceof Transaction){
-                item.getTransactions().add((Transaction) curItem);
-                curItem = null;
-            }
+//            item.setTransactions(new ArrayList<>());
+//            while(peek() instanceof Transaction){
+//                item.getTransactions().add((Transaction) curItem);
+//                curItem = null;
+//            }
         }
 
         return item;

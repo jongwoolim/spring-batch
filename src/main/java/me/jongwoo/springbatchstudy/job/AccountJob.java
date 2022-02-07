@@ -1,7 +1,7 @@
 package me.jongwoo.springbatchstudy.job;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import me.jongwoo.springbatchstudy.batch.AccountRowMapper;
 import me.jongwoo.springbatchstudy.batch.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
 import org.springframework.batch.core.Job;
@@ -10,20 +10,17 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.file.transform.LineTokenizer;
-import org.springframework.batch.item.json.JacksonJsonObjectReader;
-import org.springframework.batch.item.json.JsonItemReader;
-import org.springframework.batch.item.json.builder.JsonItemReaderBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 
-import java.text.SimpleDateFormat;
+import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +30,7 @@ public class AccountJob {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
+    private final DataSource dataSource;
 
     @Bean
     public Job copyFileJob(){
@@ -47,7 +45,7 @@ public class AccountJob {
     public Step copyFileStep(){
         return this.stepBuilderFactory.get("copyFileStep")
                 .chunk(10)
-                .reader(accountFileReader(null))
+                .reader(accountItemReader(dataSource))
 //                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
                 .build();
@@ -55,23 +53,40 @@ public class AccountJob {
 
     @Bean
     @StepScope
-    public JsonItemReader<Account> accountFileReader(
-            @Value("#{jobParameters['customerFile']}") Resource inputFile
-    ){
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
-
-        JacksonJsonObjectReader<Account> jacksonJsonObjectReader =
-                new JacksonJsonObjectReader<>(Account.class);
-
-        jacksonJsonObjectReader.setMapper(objectMapper);
-
-        return new JsonItemReaderBuilder<Account>()
-                .name("accountFileReader")
-                .jsonObjectReader(jacksonJsonObjectReader)
-                .resource(inputFile)
+    public JdbcCursorItemReader<Account> accountItemReader(DataSource dataSource){
+        return new JdbcCursorItemReaderBuilder<Account>()
+                .name("accountItemReader")
+                .dataSource(dataSource)
+                .sql("select * from account")
+                .rowMapper(new AccountRowMapper())
                 .build();
     }
+
+    /**
+     json Reader
+
+//    @Bean
+//    @StepScope
+//    public JsonItemReader<Account> accountFileReader(
+//            @Value("#{jobParameters['customerFile']}") Resource inputFile
+//    ){
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
+//
+//        JacksonJsonObjectReader<Account> jacksonJsonObjectReader =
+//                new JacksonJsonObjectReader<>(Account.class);
+//
+//        jacksonJsonObjectReader.setMapper(objectMapper);
+//
+//        return new JsonItemReaderBuilder<Account>()
+//                .name("accountFileReader")
+//                .jsonObjectReader(jacksonJsonObjectReader)
+//                .resource(inputFile)
+//                .build();
+//    }
+
+     */
+
 
     /**
      xml reader
