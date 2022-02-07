@@ -4,11 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @Getter
 @Setter
 @ToString
+@XmlRootElement
 public class Account {
 
     private String firstName;
@@ -20,7 +24,14 @@ public class Account {
     private String city;
     private String state;
     private String zipCode;
+
     private List<Transaction> transactions;
+
+    @XmlElementWrapper(name = "transactions")
+    @XmlElement(name = "transaction")
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
 
     public Account(){
 

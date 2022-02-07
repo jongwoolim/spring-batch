@@ -1,5 +1,5 @@
-<customers>
-    <customer>
+<accounts>
+    <account>
         <firstName>Laura</firstName>
         <middleInitial>O</middleInitial>
         <lastName>Minella</lastName>
@@ -14,8 +14,8 @@
                 <amount>26.08</amount>
             </transaction>
         </transactions>
-    </customer>
-    <customer>
+    </account>
+    <account>
         <firstName>Michael</firstName>
         <middleInitial>T</middleInitial>
         <lastName>Buffett</lastName>
@@ -35,5 +35,5 @@
                 <amount>-25.99</amount>
             </transaction>
         </transactions>
-    </customer>
-</customers>
+    </account>
+</accounts>

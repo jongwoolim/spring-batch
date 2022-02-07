@@ -3,6 +3,7 @@ package me.jongwoo.springbatchstudy.job;
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
+import me.jongwoo.springbatchstudy.domain.Transaction;
 import me.jongwoo.springbatchstudy.reader.AccountFileReader;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -19,10 +20,15 @@ import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.file.transform.LineTokenizer;
+import org.springframework.batch.item.xml.StaxEventItemReader;
+import org.springframework.batch.item.xml.builder.StaxEventItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,49 +53,78 @@ public class AccountJob {
     public Step copyFileStep(){
         return this.stepBuilderFactory.get("copyFileStep")
                 .chunk(10)
-                .reader(multiAccountReader(null))
+                .reader(accountFileReader(null))
+//                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
                 .build();
     }
 
     @Bean
     @StepScope
-    public FlatFileItemReader accountItemReader(
-//            @Value("#{jobParameters['customerFile']}") String inputFile
+    public StaxEventItemReader<Account> accountFileReader(
+            @Value("#{jobParameters['customerFile']}") String inputFile
     ){
-        return new FlatFileItemReaderBuilder<Account>()
-                .name("accountItemReader")
-//                .resource(inputFIle)
-                .lineMapper(lineTokenizer())
-//                .lineTokenizer(new AccountFileLineTokenizer()) // 특이한 파일 포맷 파싱, 엑셀 워크시트 같은 서드파티 파일 포맷, 특수한 타입 변환 요구 조건 처리 시 사용
-//                .delimited()
-                //고정 너비 파일일 경우
-//                .fixedLength()
-//                .columns(new Range[]{new Range(1,11), new Range(12,12),new Range(13,22),
-//                                new Range(23,26),new Range(27,46),new Range(47,62),new Range(63,64),new Range(65,69)})
-//                .names("firstName", "middleInitial", "lastName","addressNumber","street","city","state","zipCode")
-//                .fieldSetMapper(new AccountFileSetMapper())
-//                .targetType(Account.class)
-                .build();
 
-    }
-
-    @Bean
-    @StepScope
-    public MultiResourceItemReader multiAccountReader(
-            @Value("#{jobParameters['customerFile']}") Resource[] inputFiles
-    ){
-        return new MultiResourceItemReaderBuilder<>()
-                .name("multiAccountReader")
-                .resources(inputFiles)
-                .delegate(accountFileReader())
+        return new StaxEventItemReaderBuilder<Account>()
+                .name("accountFileReader")
+                .resource(new ClassPathResource(inputFile))
+                .addFragmentRootElements("account")
+                .unmarshaller(accountMarshaller())
                 .build();
     }
 
-    @Bean
-    public AccountFileReader accountFileReader(){
-        return new AccountFileReader(accountItemReader());
-    }
+     @Bean
+     public Jaxb2Marshaller accountMarshaller(){
+        Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+        jaxb2Marshaller.setClassesToBeBound(Account.class, Transaction.class);
+        return jaxb2Marshaller;
+     }
+
+
+    /**
+     플랫 파일 reader
+
+//    @Bean
+//    @StepScope
+//    public FlatFileItemReader accountItemReader(
+////            @Value("#{jobParameters['customerFile']}") String inputFile
+//    ){
+//        return new FlatFileItemReaderBuilder<Account>()
+//                .name("accountItemReader")
+////                .resource(inputFIle)
+//                .lineMapper(lineTokenizer())
+////                .lineTokenizer(new AccountFileLineTokenizer()) // 특이한 파일 포맷 파싱, 엑셀 워크시트 같은 서드파티 파일 포맷, 특수한 타입 변환 요구 조건 처리 시 사용
+////                .delimited()
+//                //고정 너비 파일일 경우
+////                .fixedLength()
+////                .columns(new Range[]{new Range(1,11), new Range(12,12),new Range(13,22),
+////                                new Range(23,26),new Range(27,46),new Range(47,62),new Range(63,64),new Range(65,69)})
+////                .names("firstName", "middleInitial", "lastName","addressNumber","street","city","state","zipCode")
+////                .fieldSetMapper(new AccountFileSetMapper())
+////                .targetType(Account.class)
+//                .build();
+//
+//    }
+//
+//    @Bean
+//    @StepScope
+//    public MultiResourceItemReader multiAccountReader(
+//            @Value("#{jobParameters['customerFile']}") Resource[] inputFiles
+//    ){
+//        return new MultiResourceItemReaderBuilder<>()
+//                .name("multiAccountReader")
+//                .resources(inputFiles)
+//                .delegate(accountFileReader())
+//                .build();
+//    }
+//
+//    @Bean
+//    public AccountFileReader accountFileReader(){
+//        return new AccountFileReader(accountItemReader());
+//    }
+
+
+     */
 
     @Bean
     public PatternMatchingCompositeLineMapper lineTokenizer(){
