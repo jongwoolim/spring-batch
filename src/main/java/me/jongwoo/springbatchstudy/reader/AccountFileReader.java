@@ -17,6 +17,9 @@ public class AccountFileReader implements ItemStreamReader<Account> {
 
     @Override
     public Account read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
+        // 제어 중지 로직
+        // Account 아이템을 하나 읽어들이고 다음 고객 아이템을 만나기 전까지 현재  처리 중인 고객 레코드으ㅘ 관련된
+        // 거래 내역 레코드를 한 줄씩 읽어들이고 다음 고객 레코드를 발견하면 현재 처리 중인 고객 레코드 처리가 끝난 것으로 간주하여 커스텀 ItemReader로 반환한다
         if(curItem == null){
             curItem = delegate.read();
         }
