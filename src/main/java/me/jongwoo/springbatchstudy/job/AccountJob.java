@@ -1,5 +1,6 @@
 package me.jongwoo.springbatchstudy.job;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
@@ -20,6 +21,9 @@ import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.file.transform.LineTokenizer;
+import org.springframework.batch.item.json.JacksonJsonObjectReader;
+import org.springframework.batch.item.json.JsonItemReader;
+import org.springframework.batch.item.json.builder.JsonItemReaderBuilder;
 import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.batch.item.xml.builder.StaxEventItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +34,7 @@ import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,26 +66,49 @@ public class AccountJob {
 
     @Bean
     @StepScope
-    public StaxEventItemReader<Account> accountFileReader(
-            @Value("#{jobParameters['customerFile']}") String inputFile
+    public JsonItemReader<Account> accountFileReader(
+            @Value("#{jobParameters['customerFile']}") Resource inputFile
     ){
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"));
 
-        return new StaxEventItemReaderBuilder<Account>()
+        JacksonJsonObjectReader<Account> jacksonJsonObjectReader =
+                new JacksonJsonObjectReader<>(Account.class);
+
+        jacksonJsonObjectReader.setMapper(objectMapper);
+
+        return new JsonItemReaderBuilder<Account>()
                 .name("accountFileReader")
-                .resource(new ClassPathResource(inputFile))
-                .addFragmentRootElements("account")
-                .unmarshaller(accountMarshaller())
+                .jsonObjectReader(jacksonJsonObjectReader)
+                .resource(inputFile)
                 .build();
     }
 
-    // Jaxb2Marshaller 에게 대상 클래스를 알려주도록 작성
-     @Bean
-     public Jaxb2Marshaller accountMarshaller(){
-        Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
-        jaxb2Marshaller.setClassesToBeBound(Account.class, Transaction.class);
-        return jaxb2Marshaller;
-     }
+    /**
+     xml reader
 
+//    @Bean
+//    @StepScope
+//    public StaxEventItemReader<Account> accountFileReader(
+//            @Value("#{jobParameters['customerFile']}") String inputFile
+//    ){
+//
+//        return new StaxEventItemReaderBuilder<Account>()
+//                .name("accountFileReader")
+//                .resource(new ClassPathResource(inputFile))
+//                .addFragmentRootElements("account")
+//                .unmarshaller(accountMarshaller())
+//                .build();
+//    }
+//
+//    // Jaxb2Marshaller 에게 대상 클래스를 알려주도록 작성
+//     @Bean
+//     public Jaxb2Marshaller accountMarshaller(){
+//        Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+//        jaxb2Marshaller.setClassesToBeBound(Account.class, Transaction.class);
+//        return jaxb2Marshaller;
+//     }
+     */
 
     /**
      플랫 파일 reader
