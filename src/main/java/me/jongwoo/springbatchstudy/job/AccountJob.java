@@ -1,8 +1,6 @@
 package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
-import me.jongwoo.springbatchstudy.AccountFileLineTokenizer;
-import me.jongwoo.springbatchstudy.AccountFileSetMapper;
 import me.jongwoo.springbatchstudy.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
 import me.jongwoo.springbatchstudy.reader.AccountFileReader;
@@ -24,7 +22,6 @@ import org.springframework.batch.item.file.transform.LineTokenizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import java.util.HashMap;
@@ -36,7 +33,6 @@ public class AccountJob {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-
 
     @Bean
     public Job copyFileJob(){
@@ -51,20 +47,8 @@ public class AccountJob {
     public Step copyFileStep(){
         return this.stepBuilderFactory.get("copyFileStep")
                 .chunk(10)
-                .reader(accountFileReader())
+                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
-                .build();
-    }
-
-    @Bean
-    @StepScope
-    public MultiResourceItemReader multiAccountReader(
-            @Value("#{jobParameters['customerFile']}") Resource[] inputFiles
-    ){
-        return new MultiResourceItemReaderBuilder<>()
-                .name("multiAccountReader")
-                .resources(inputFiles)
-                .delegate(accountFileReader())
                 .build();
     }
 
@@ -75,7 +59,7 @@ public class AccountJob {
     ){
         return new FlatFileItemReaderBuilder<Account>()
                 .name("accountItemReader")
-//                .resource(new ClassPathResource(inputFile))
+//                .resource(inputFIle)
                 .lineMapper(lineTokenizer())
 //                .lineTokenizer(new AccountFileLineTokenizer()) // 특이한 파일 포맷 파싱, 엑셀 워크시트 같은 서드파티 파일 포맷, 특수한 타입 변환 요구 조건 처리 시 사용
 //                .delimited()
@@ -88,6 +72,18 @@ public class AccountJob {
 //                .targetType(Account.class)
                 .build();
 
+    }
+
+    @Bean
+    @StepScope
+    public MultiResourceItemReader multiAccountReader(
+            @Value("#{jobParameters['customerFile']}") Resource[] inputFiles
+    ){
+        return new MultiResourceItemReaderBuilder<>()
+                .name("multiAccountReader")
+                .resources(inputFiles)
+                .delegate(accountFileReader())
+                .build();
     }
 
     @Bean
