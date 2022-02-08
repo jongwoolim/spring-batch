@@ -17,8 +17,10 @@ import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.file.transform.LineTokenizer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.ArgumentPreparedStatementSetter;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -57,9 +59,18 @@ public class AccountJob {
         return new JdbcCursorItemReaderBuilder<Account>()
                 .name("accountItemReader")
                 .dataSource(dataSource)
-                .sql("select * from account")
+                .sql("select * from account where city = ?")
                 .rowMapper(new AccountRowMapper())
+                .preparedStatementSetter(citySetter(null))
                 .build();
+    }
+
+    @Bean
+    @StepScope
+    public ArgumentPreparedStatementSetter citySetter(
+            @Value("#{jobParameters['city']}") String city
+    ){
+        return new ArgumentPreparedStatementSetter(new Object[]{city});
     }
 
     /**
