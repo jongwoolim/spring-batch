@@ -11,7 +11,11 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.JdbcPagingItemReader;
+import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper;
@@ -32,7 +36,6 @@ public class AccountJob {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final DataSource dataSource;
 
     @Bean
     public Job copyFileJob(){
@@ -47,31 +50,71 @@ public class AccountJob {
     public Step copyFileStep(){
         return this.stepBuilderFactory.get("copyFileStep")
                 .chunk(10)
-                .reader(accountItemReader(dataSource))
+                .reader(accountItemReader(null, null, null))
 //                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
                 .build();
     }
 
+
     @Bean
     @StepScope
-    public JdbcCursorItemReader<Account> accountItemReader(DataSource dataSource){
-        return new JdbcCursorItemReaderBuilder<Account>()
+    public JdbcPagingItemReader<Account> accountItemReader(
+            DataSource dataSource,
+            PagingQueryProvider queryProvider,
+            @Value("#{jobParameters['city']}") String city
+
+    ){
+        Map<String, Object> parameterValues = new HashMap<>(1);
+        parameterValues.put("city", city);
+
+        return new JdbcPagingItemReaderBuilder<Account>()
                 .name("accountItemReader")
                 .dataSource(dataSource)
-                .sql("select * from account where city = ?")
+                .queryProvider(queryProvider)
+                .parameterValues(parameterValues)
+                .pageSize(10) // 페이지 크기
                 .rowMapper(new AccountRowMapper())
-                .preparedStatementSetter(citySetter(null))
                 .build();
     }
 
     @Bean
-    @StepScope
-    public ArgumentPreparedStatementSetter citySetter(
-            @Value("#{jobParameters['city']}") String city
-    ){
-        return new ArgumentPreparedStatementSetter(new Object[]{city});
+    public SqlPagingQueryProviderFactoryBean pagingQueryProviderFactoryBean(DataSource dataSource){
+        SqlPagingQueryProviderFactoryBean factoryBean =
+                new SqlPagingQueryProviderFactoryBean();
+
+        factoryBean.setSelectClause("select *");
+        factoryBean.setFromClause("from account");
+        factoryBean.setWhereClause("where city = :city");
+        factoryBean.setSortKey("lastName"); // 페이징 기법 사용할 때 결과 정렬하는 것 중요
+        factoryBean.setDataSource(dataSource);
+
+        return factoryBean;
     }
+
+    /**
+     *
+     JdbcCursorItemReader
+//    @Bean
+//    @StepScope
+//    public JdbcCursorItemReader<Account> accountItemReader(DataSource dataSource){
+//        return new JdbcCursorItemReaderBuilder<Account>()
+//                .name("accountItemReader")
+//                .dataSource(dataSource)
+//                .sql("select * from account where city = ?")
+//                .rowMapper(new AccountRowMapper())
+//                .preparedStatementSetter(citySetter(null))
+//                .build();
+//    }
+//
+//    @Bean
+//    @StepScope
+//    public ArgumentPreparedStatementSetter citySetter(
+//            @Value("#{jobParameters['city']}") String city
+//    ){
+//        return new ArgumentPreparedStatementSetter(new Object[]{city});
+//    }
+     */
 
     /**
      json Reader
