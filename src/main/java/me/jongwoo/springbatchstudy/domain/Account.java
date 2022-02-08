@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -13,8 +15,10 @@ import java.util.List;
 @Setter
 @ToString
 //@XmlRootElement
+@Entity
 public class Account {
 
+    @Id
     private Long id;
     private String firstName;
     private String middleInitial;
