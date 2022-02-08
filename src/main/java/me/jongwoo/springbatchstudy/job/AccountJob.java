@@ -1,21 +1,17 @@
 package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
-import me.jongwoo.springbatchstudy.batch.AccountRowMapper;
 import me.jongwoo.springbatchstudy.batch.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
+import org.hibernate.SessionFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JdbcCursorItemReader;
-import org.springframework.batch.item.database.JdbcPagingItemReader;
-import org.springframework.batch.item.database.PagingQueryProvider;
-import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
-import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
-import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.batch.item.database.HibernateCursorItemReader;
+import org.springframework.batch.item.database.builder.HibernateCursorItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper;
@@ -24,9 +20,9 @@ import org.springframework.batch.item.file.transform.LineTokenizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.ArgumentPreparedStatementSetter;
 
-import javax.sql.DataSource;
+import javax.persistence.EntityManagerFactory;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,47 +46,64 @@ public class AccountJob {
     public Step copyFileStep(){
         return this.stepBuilderFactory.get("copyFileStep")
                 .chunk(10)
-                .reader(accountItemReader(null, null, null))
+                .reader(accountItemReader(null, null))
 //                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
                 .build();
     }
 
-
     @Bean
     @StepScope
-    public JdbcPagingItemReader<Account> accountItemReader(
-            DataSource dataSource,
-            PagingQueryProvider queryProvider,
+    public HibernateCursorItemReader<Account> accountItemReader(
+            EntityManagerFactory entityManagerFactory,
             @Value("#{jobParameters['city']}") String city
-
     ){
-        Map<String, Object> parameterValues = new HashMap<>(1);
-        parameterValues.put("city", city);
-
-        return new JdbcPagingItemReaderBuilder<Account>()
+        return new HibernateCursorItemReaderBuilder<Account>()
                 .name("accountItemReader")
-                .dataSource(dataSource)
-                .queryProvider(queryProvider)
-                .parameterValues(parameterValues)
-                .pageSize(10) // 페이지 크기
-                .rowMapper(new AccountRowMapper())
+                .sessionFactory(entityManagerFactory.unwrap(SessionFactory.class))
+                .queryString("from Account where city = :city")
+                .parameterValues(Collections.singletonMap("city", city))
                 .build();
     }
 
-    @Bean
-    public SqlPagingQueryProviderFactoryBean pagingQueryProviderFactoryBean(DataSource dataSource){
-        SqlPagingQueryProviderFactoryBean factoryBean =
-                new SqlPagingQueryProviderFactoryBean();
-
-        factoryBean.setSelectClause("select *");
-        factoryBean.setFromClause("from account");
-        factoryBean.setWhereClause("where city = :city");
-        factoryBean.setSortKey("lastName"); // 페이징 기법 사용할 때 결과 정렬하는 것 중요
-        factoryBean.setDataSource(dataSource);
-
-        return factoryBean;
-    }
+    /**
+     *
+     JdbcPagingItemReader
+//    @Bean
+//    @StepScope
+//    public JdbcPagingItemReader<Account> accountItemReader(
+//            DataSource dataSource,
+//            PagingQueryProvider queryProvider,
+//            @Value("#{jobParameters['city']}") String city
+//
+//    ){
+//        Map<String, Object> parameterValues = new HashMap<>(1);
+//        parameterValues.put("city", city);
+//
+//        return new JdbcPagingItemReaderBuilder<Account>()
+//                .name("accountItemReader")
+//                .dataSource(dataSource)
+//                .queryProvider(queryProvider)
+//                .parameterValues(parameterValues)
+//                .pageSize(10) // 페이지 크기
+//                .rowMapper(new AccountRowMapper())
+//                .build();
+//    }
+//
+//    @Bean
+//    public SqlPagingQueryProviderFactoryBean pagingQueryProviderFactoryBean(DataSource dataSource){
+//        SqlPagingQueryProviderFactoryBean factoryBean =
+//                new SqlPagingQueryProviderFactoryBean();
+//
+//        factoryBean.setSelectClause("select *");
+//        factoryBean.setFromClause("from account");
+//        factoryBean.setWhereClause("where city = :city");
+//        factoryBean.setSortKey("lastName"); // 페이징 기법 사용할 때 결과 정렬하는 것 중요
+//        factoryBean.setDataSource(dataSource);
+//
+//        return factoryBean;
+//    }
+     */
 
     /**
      *
