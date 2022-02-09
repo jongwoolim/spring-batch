@@ -11,7 +11,9 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.HibernateCursorItemReader;
+import org.springframework.batch.item.database.HibernatePagingItemReader;
 import org.springframework.batch.item.database.builder.HibernateCursorItemReaderBuilder;
+import org.springframework.batch.item.database.builder.HibernatePagingItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper;
@@ -46,7 +48,7 @@ public class AccountJob {
     public Step copyFileStep(){
         return this.stepBuilderFactory.get("copyFileStep")
                 .chunk(10)
-                .reader(accountItemReader(null, null))
+                .reader(accountItemReader(null,null))
 //                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
                 .build();
@@ -54,15 +56,18 @@ public class AccountJob {
 
     @Bean
     @StepScope
-    public HibernateCursorItemReader<Account> accountItemReader(
+    // cursor: HibernateCursorItemReader
+    // paging: HibernatePagingItemReader
+    public HibernatePagingItemReader<Account> accountItemReader(
             EntityManagerFactory entityManagerFactory,
             @Value("#{jobParameters['city']}") String city
     ){
-        return new HibernateCursorItemReaderBuilder<Account>()
+        return new HibernatePagingItemReaderBuilder<Account>()
                 .name("accountItemReader")
                 .sessionFactory(entityManagerFactory.unwrap(SessionFactory.class))
                 .queryString("from Account where city = :city")
                 .parameterValues(Collections.singletonMap("city", city))
+                .pageSize(10)
                 .build();
     }
 
