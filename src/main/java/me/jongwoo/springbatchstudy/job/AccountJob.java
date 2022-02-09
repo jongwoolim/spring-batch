@@ -12,8 +12,10 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.HibernateCursorItemReader;
 import org.springframework.batch.item.database.HibernatePagingItemReader;
+import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.HibernateCursorItemReaderBuilder;
 import org.springframework.batch.item.database.builder.HibernatePagingItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.mapping.PatternMatchingCompositeLineMapper;
@@ -56,18 +58,23 @@ public class AccountJob {
 
     @Bean
     @StepScope
+    // JPA
+    // cursor: x
+    // paging: JpaPagingItemReader
+    // Hibernate
     // cursor: HibernateCursorItemReader
     // paging: HibernatePagingItemReader
-    public HibernatePagingItemReader<Account> accountItemReader(
+    public JpaPagingItemReader<Account> accountItemReader(
             EntityManagerFactory entityManagerFactory,
             @Value("#{jobParameters['city']}") String city
     ){
-        return new HibernatePagingItemReaderBuilder<Account>()
+        return new JpaPagingItemReaderBuilder<Account>()
                 .name("accountItemReader")
-                .sessionFactory(entityManagerFactory.unwrap(SessionFactory.class))
-                .queryString("from Account where city = :city")
+//                .sessionFactory(entityManagerFactory.unwrap(SessionFactory.class))
+                .entityManagerFactory(entityManagerFactory)
+//                .queryString("from Account where city = :city")
+                .queryString("select a from Account a where a.city = :city")
                 .parameterValues(Collections.singletonMap("city", city))
-                .pageSize(10)
                 .build();
     }
 
