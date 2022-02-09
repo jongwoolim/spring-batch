@@ -1,6 +1,7 @@
 package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
+import me.jongwoo.springbatchstudy.batch.AccountByCityQueryProvider;
 import me.jongwoo.springbatchstudy.batch.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
 import org.hibernate.SessionFactory;
@@ -68,12 +69,15 @@ public class AccountJob {
             EntityManagerFactory entityManagerFactory,
             @Value("#{jobParameters['city']}") String city
     ){
+        AccountByCityQueryProvider queryProvider = new AccountByCityQueryProvider();
+        queryProvider.setCityName(city);
         return new JpaPagingItemReaderBuilder<Account>()
                 .name("accountItemReader")
 //                .sessionFactory(entityManagerFactory.unwrap(SessionFactory.class))
                 .entityManagerFactory(entityManagerFactory)
 //                .queryString("from Account where city = :city")
-                .queryString("select a from Account a where a.city = :city")
+//                .queryString("select a from Account a where a.city = :city")
+                .queryProvider(queryProvider)
                 .parameterValues(Collections.singletonMap("city", city))
                 .build();
     }
