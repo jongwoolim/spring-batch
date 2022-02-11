@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.batch.AccountByCityQueryProvider;
 import me.jongwoo.springbatchstudy.batch.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
+import me.jongwoo.springbatchstudy.repository.AccountRepository;
 import org.hibernate.SessionFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -11,6 +12,8 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.data.RepositoryItemReader;
+import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.batch.item.database.HibernateCursorItemReader;
 import org.springframework.batch.item.database.HibernatePagingItemReader;
 import org.springframework.batch.item.database.JpaPagingItemReader;
@@ -25,6 +28,7 @@ import org.springframework.batch.item.file.transform.LineTokenizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Sort;
 
 import javax.persistence.EntityManagerFactory;
 import java.util.Collections;
@@ -37,6 +41,7 @@ public class AccountJob {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
+    private final AccountRepository accounutRepository;
 
     @Bean
     public Job copyFileJob(){
@@ -51,7 +56,7 @@ public class AccountJob {
     public Step copyFileStep(){
         return this.stepBuilderFactory.get("copyFileStep")
                 .chunk(10)
-                .reader(accountItemReader(null,null))
+                .reader(accountItemReader(null))
 //                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
                 .build();
@@ -59,26 +64,33 @@ public class AccountJob {
 
     @Bean
     @StepScope
+    // Spring Data
+    // RepositoryItemReader
     // JPA
     // cursor: x
     // paging: JpaPagingItemReader
     // Hibernate
     // cursor: HibernateCursorItemReader
     // paging: HibernatePagingItemReader
-    public JpaPagingItemReader<Account> accountItemReader(
-            EntityManagerFactory entityManagerFactory,
+    public RepositoryItemReader<Account> accountItemReader(
             @Value("#{jobParameters['city']}") String city
     ){
-        AccountByCityQueryProvider queryProvider = new AccountByCityQueryProvider();
-        queryProvider.setCityName(city);
-        return new JpaPagingItemReaderBuilder<Account>()
+//        AccountByCityQueryProvider queryProvider = new AccountByCityQueryProvider();
+//        queryProvider.setCityName(city);
+        return new RepositoryItemReaderBuilder<Account>()
                 .name("accountItemReader")
-//                .sessionFactory(entityManagerFactory.unwrap(SessionFactory.class))
-                .entityManagerFactory(entityManagerFactory)
-//                .queryString("from Account where city = :city")
-//                .queryString("select a from Account a where a.city = :city")
-                .queryProvider(queryProvider)
-                .parameterValues(Collections.singletonMap("city", city))
+                .arguments(Collections.singletonList(city))
+//                .pageSize(5) 기본값 10
+                .methodName("findByCity")
+                .repository(accounutRepository)
+                .sorts(Collections.singletonMap("lastName", Sort.Direction.ASC))
+
+////                .sessionFactory(entityManagerFactory.unwrap(SessionFactory.class))
+//                .entityManagerFactory(entityManagerFactory)
+////                .queryString("from Account where city = :city")
+////                .queryString("select a from Account a where a.city = :city")
+//                .queryProvider(queryProvider)
+//                .parameterValues(Collections.singletonMap("city", city))
                 .build();
     }
 
