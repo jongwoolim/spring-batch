@@ -11,6 +11,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.adapter.ItemReaderAdapter;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
@@ -43,10 +44,15 @@ public class AccountJob {
     @Bean
     public Step copyFileStep() {
         return this.stepBuilderFactory.get("copyFileStep")
-                .chunk(10)
+                .<Account,Account>chunk(10)
                 .reader(accountItemReader())
 //                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
+                .faultTolerant()
+                .skip(Exception.class) // Exception을 상속한 모든 예외를 10번까지 건너뛸 수 있음
+//                .skip(ParseException.class)
+                .noSkip(ParseException.class) // ParseException을 제외한 모든 예외 건너뜀
+                .skipLimit(10)
                 .build();
     }
 
