@@ -52,6 +52,8 @@ public class AccountItemReader extends ItemStreamSupport implements ItemReader<A
 
     @Override
     public void open(ExecutionContext executionContext) {
+        // update 메서드에서 값 설정했는 지 여부 체크
+        // 설정 되어있으면 잡 재시작 의미
         if(executionContext.containsKey(getExecutionContextKey(INDEX_KEY))){
             int index = executionContext.getInt(getExecutionContextKey(INDEX_KEY));
 
@@ -68,6 +70,7 @@ public class AccountItemReader extends ItemStreamSupport implements ItemReader<A
 
     @Override
     public void update(ExecutionContext executionContext) {
+        // 현재 처리 중인 레코드를 나타내는 키-값 쌍
         executionContext.putInt(getExecutionContextKey(INDEX_KEY), curIndex);
     }
 
