@@ -3,6 +3,7 @@ package me.jongwoo.springbatchstudy.job;
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.batch.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
+import me.jongwoo.springbatchstudy.reader.AccountItemReader;
 import me.jongwoo.springbatchstudy.repository.AccountRepository;
 import me.jongwoo.springbatchstudy.service.AccountService;
 import org.springframework.batch.core.Job;
@@ -43,20 +44,28 @@ public class AccountJob {
     public Step copyFileStep() {
         return this.stepBuilderFactory.get("copyFileStep")
                 .chunk(10)
-                .reader(accountItemReader(null))
+                .reader(accountItemReader())
 //                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
                 .build();
     }
 
     @Bean
-    public ItemReaderAdapter<Account> accountItemReader(AccountService accountService) {
-        ItemReaderAdapter<Account> adapter = new ItemReaderAdapter<>();
-        adapter.setTargetObject(accountService);
-        adapter.setTargetMethod("getAccount");
+    public AccountItemReader accountItemReader(){
+        AccountItemReader accountItemReader = new AccountItemReader();
+        accountItemReader.setName("accountItemReader");
 
-        return adapter;
+        return accountItemReader;
     }
+
+//    @Bean
+//    public ItemReaderAdapter<Account> accountItemReader(AccountService accountService) {
+//        ItemReaderAdapter<Account> adapter = new ItemReaderAdapter<>();
+//        adapter.setTargetObject(accountService);
+//        adapter.setTargetMethod("getAccount");
+//
+//        return adapter;
+//    }
 
 //    @Bean
 //    @StepScope
