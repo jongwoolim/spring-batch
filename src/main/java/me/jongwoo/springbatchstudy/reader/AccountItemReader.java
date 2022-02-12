@@ -1,19 +1,17 @@
 package me.jongwoo.springbatchstudy.reader;
 
 import me.jongwoo.springbatchstudy.domain.Account;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.NonTransientResourceException;
-import org.springframework.batch.item.ParseException;
-import org.springframework.batch.item.UnexpectedInputException;
+import org.springframework.batch.item.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class AccountItemReader implements ItemReader<Account> {
+public class AccountItemReader extends ItemStreamSupport implements ItemReader<Account> {
 
     private List<Account> accounts;
     private int curIndex;
+    private String INDEX_KEY = "current.index.accounts"; // 고유 키
 
     private String [] firstNames = {"Michael", "Warren", "Ann", "Terrence", "Erica", "Laura", "Steve", "Larry"};
     private String middleInitial = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -40,6 +38,10 @@ public class AccountItemReader implements ItemReader<Account> {
     public Account read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
         Account account = null;
 
+        if(curIndex== 50){
+            throw new RuntimeException("This will end your execution");
+        }
+
         if(curIndex < accounts.size()){
             account = accounts.get(curIndex);
             curIndex++;
@@ -47,6 +49,34 @@ public class AccountItemReader implements ItemReader<Account> {
 
         return account;
     }
+
+    @Override
+    public void open(ExecutionContext executionContext) {
+        if(executionContext.containsKey(getExecutionContextKey(INDEX_KEY))){
+            int index = executionContext.getInt(getExecutionContextKey(INDEX_KEY));
+
+            if(index == 50){
+                curIndex = 51;
+            }else {
+                curIndex = index;
+            }
+
+        }else{
+            curIndex = 0;
+        }
+    }
+
+    @Override
+    public void update(ExecutionContext executionContext) {
+        executionContext.putInt(getExecutionContextKey(INDEX_KEY), curIndex);
+    }
+
+
+    @Override
+    public void close() {
+
+    }
+
 
     private Account buildCustomer() {
         Account account = new Account();
