@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.batch.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
 import me.jongwoo.springbatchstudy.listener.AccountItemListener;
+import me.jongwoo.springbatchstudy.listener.EmptyInputStepFailer;
 import me.jongwoo.springbatchstudy.policy.FileVerificationSkipper;
 import me.jongwoo.springbatchstudy.reader.AccountItemReader;
 import me.jongwoo.springbatchstudy.repository.AccountRepository;
@@ -48,12 +49,11 @@ public class AccountJob {
         return this.stepBuilderFactory.get("copyFileStep")
                 .<Account,Account>chunk(10)
                 .reader(accountItemReader())
-//                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
                 .faultTolerant()
-                .skipLimit(100)
                 .skip(Exception.class) // Exception을 상속한 모든 예외를 10번까지 건너뛸 수 있음
-                .listener(accountItemListener())
+                .skipLimit(100)
+                .listener(emptyFileFailer())
                 .build();
     }
 
@@ -63,6 +63,11 @@ public class AccountJob {
         accountItemReader.setName("accountItemReader");
 
         return accountItemReader;
+    }
+
+    @Bean
+    public EmptyInputStepFailer emptyFileFailer(){
+        return new EmptyInputStepFailer();
     }
 
     @Bean
