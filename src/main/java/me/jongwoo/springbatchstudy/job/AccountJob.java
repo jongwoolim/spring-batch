@@ -3,6 +3,7 @@ package me.jongwoo.springbatchstudy.job;
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.batch.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
+import me.jongwoo.springbatchstudy.policy.FileVerificationSkipper;
 import me.jongwoo.springbatchstudy.reader.AccountItemReader;
 import me.jongwoo.springbatchstudy.repository.AccountRepository;
 import me.jongwoo.springbatchstudy.service.AccountService;
