@@ -3,6 +3,7 @@ package me.jongwoo.springbatchstudy.job;
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.batch.TransactionFieldSetMapper;
 import me.jongwoo.springbatchstudy.domain.Account;
+import me.jongwoo.springbatchstudy.listener.AccountItemListener;
 import me.jongwoo.springbatchstudy.policy.FileVerificationSkipper;
 import me.jongwoo.springbatchstudy.reader.AccountItemReader;
 import me.jongwoo.springbatchstudy.repository.AccountRepository;
@@ -50,10 +51,9 @@ public class AccountJob {
 //                .reader(multiAccountReader(null))
                 .writer(accountItemWriter())
                 .faultTolerant()
+                .skipLimit(100)
                 .skip(Exception.class) // Exception을 상속한 모든 예외를 10번까지 건너뛸 수 있음
-//                .skip(ParseException.class)
-                .noSkip(ParseException.class) // ParseException을 제외한 모든 예외 건너뜀
-                .skipLimit(10)
+                .listener(accountItemListener())
                 .build();
     }
 
@@ -63,6 +63,11 @@ public class AccountJob {
         accountItemReader.setName("accountItemReader");
 
         return accountItemReader;
+    }
+
+    @Bean
+    public AccountItemListener accountItemListener(){
+        return new AccountItemListener();
     }
 
 //    @Bean
