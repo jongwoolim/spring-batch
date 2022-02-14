@@ -20,7 +20,7 @@ public class Customer2 {
     private String middleInitial;
 
     @NotNull(message = "Last name is required")
-    @Pattern(regexp = "[a-zA-Z]", message = "Last name must be alphabetical")
+    @Pattern(regexp = "[a-zA-Z]+", message = "Last name must be alphabetical")
     private String lastName;
 
     @NotNull(message = "Address is required")
