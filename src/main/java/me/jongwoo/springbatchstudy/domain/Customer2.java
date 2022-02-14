@@ -16,11 +16,11 @@ public class Customer2 {
     private String firstName;
 
     @Size(min = 1, max = 1)
-    @Pattern(regexp = "[a-zA-Z]]", message = "Middle initial must be alphabetical")
+    @Pattern(regexp = "[a-zA-Z]", message = "Middle initial must be alphabetical")
     private String middleInitial;
 
     @NotNull(message = "Last name is required")
-    @Pattern(regexp = "[a-zA-Z]]", message = "Last name must be alphabetical")
+    @Pattern(regexp = "[a-zA-Z]", message = "Last name must be alphabetical")
     private String lastName;
 
     @NotNull(message = "Address is required")
