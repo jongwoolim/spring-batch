@@ -40,4 +40,14 @@ public class Customer2 {
     @Size(min = 5, max = 5)
     @Pattern(regexp = "\\d{5}")
     private String zip;
+
+    public Customer2(Customer2 customer2){
+        this.firstName = customer2.getFirstName();
+        this.middleInitial = customer2.getMiddleInitial();
+        this.lastName = customer2.getLastName();
+        this.address = customer2.getAddress();
+        this.city = customer2.getCity();
+        this.state = customer2.getState();
+        this.zip = customer2.getZip();
+    }
 }
