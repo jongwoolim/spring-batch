@@ -13,6 +13,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.adapter.ItemProcessorAdapter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.support.ScriptItemProcessor;
 import org.springframework.batch.item.validator.BeanValidatingItemProcessor;
 import org.springframework.batch.item.validator.ValidatingItemProcessor;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,14 +66,26 @@ public class ValidationJob {
     }
 
     @Bean
-    public ItemProcessorAdapter<Customer2,Customer2> itemProcessor(UpperCaseNameService service){
+    @StepScope
+    public ScriptItemProcessor<Customer2, Customer2> itemProcessor(
+            @Value("#{jobParameters['script']}") Resource script
+    ){
+        ScriptItemProcessor<Customer2, Customer2> itemProcessor = new ScriptItemProcessor<>();
+        itemProcessor.setScript(script);
 
-        ItemProcessorAdapter<Customer2,Customer2> adapter = new ItemProcessorAdapter<>();
-        adapter.setTargetObject(service);
-        adapter.setTargetMethod("upperCase");
+        return itemProcessor;
 
-        return adapter;
     }
+
+//    @Bean
+//    public ItemProcessorAdapter<Customer2,Customer2> itemProcessor(UpperCaseNameService service){
+//
+//        ItemProcessorAdapter<Customer2,Customer2> adapter = new ItemProcessorAdapter<>();
+//        adapter.setTargetObject(service);
+//        adapter.setTargetMethod("upperCase");
+//
+//        return adapter;
+//    }
 
     @Bean
     public UniqueLastNameValidator validator(){
