@@ -16,6 +16,12 @@ public class UniqueLastNameValidator extends ItemStreamSupport implements Valida
 
     @Override
     public void validate(Customer2 customer2) throws ValidationException {
+
+        System.out.println("=======================");
+//        lastNames.forEach(System.out::println);
+        System.out.println(lastNames.contains(customer2.getLastName()));
+        System.out.println("***********************");
+        System.out.println("=======================");
         if(lastNames.contains(customer2.getLastName())){
             throw new ValidationException("Duplicate last name was found: " + customer2.getLastName());
         }
