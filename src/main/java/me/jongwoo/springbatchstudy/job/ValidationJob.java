@@ -2,6 +2,7 @@ package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.domain.Customer2;
+import me.jongwoo.springbatchstudy.processor.EvenFilteringItemProcessor;
 import me.jongwoo.springbatchstudy.processor.UniqueLastNameValidator;
 import me.jongwoo.springbatchstudy.processor.ZipCodeClassifier;
 import me.jongwoo.springbatchstudy.service.UpperCaseNameService;
@@ -72,17 +73,22 @@ public class ValidationJob {
     }
 
     @Bean
-    public Classifier classifier(){
-        return new ZipCodeClassifier(upperCaseItemProcessor(null), lowerCaseItemProcessor(null));
+    public EvenFilteringItemProcessor itemProcessor(){
+        return new EvenFilteringItemProcessor();
     }
 
-    @Bean
-    public ClassifierCompositeItemProcessor<Customer2, Customer2> itemProcessor(){
-        ClassifierCompositeItemProcessor<Customer2, Customer2> itemProcessor = new ClassifierCompositeItemProcessor<>();
-        itemProcessor.setClassifier(classifier());
-
-        return itemProcessor;
-    }
+//    @Bean
+//    public Classifier classifier(){
+//        return new ZipCodeClassifier(upperCaseItemProcessor(null), lowerCaseItemProcessor(null));
+//    }
+//
+//    @Bean
+//    public ClassifierCompositeItemProcessor<Customer2, Customer2> itemProcessor(){
+//        ClassifierCompositeItemProcessor<Customer2, Customer2> itemProcessor = new ClassifierCompositeItemProcessor<>();
+//        itemProcessor.setClassifier(classifier());
+//
+//        return itemProcessor;
+//    }
 
 //    // CompositeItemProcessor add
 //    @Bean
