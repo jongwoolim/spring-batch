@@ -13,6 +13,7 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.adapter.ItemProcessorAdapter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.batch.item.support.ScriptItemProcessor;
 import org.springframework.batch.item.validator.BeanValidatingItemProcessor;
 import org.springframework.batch.item.validator.ValidatingItemProcessor;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+
+import java.util.Arrays;
 
 @Configuration
 @RequiredArgsConstructor
@@ -40,7 +43,7 @@ public class ValidationJob {
         return stepBuilderFactory.get("copyFileValidateStep")
                 .<Customer2, Customer2>chunk(5)
                 .reader(customerItemReader(null))
-                .processor(itemProcessor(null))
+                .processor(itemProcessor())
                 .writer(itemValidateWriter())
                 .stream(validator())
                 .build()
@@ -65,9 +68,22 @@ public class ValidationJob {
 
     }
 
+    // CompositeItemProcessor add
+    @Bean
+    public CompositeItemProcessor<Customer2, Customer2> itemProcessor(){
+        CompositeItemProcessor<Customer2, Customer2> itemProcessor = new CompositeItemProcessor<>();
+
+        itemProcessor.setDelegates(Arrays.asList(
+                customer2ValidatingItemProcessor(),
+                upperCaseItemProcessor(null),
+                lowerCaseItemProcessor(null)));
+
+        return itemProcessor;
+    }
+
     @Bean
     @StepScope
-    public ScriptItemProcessor<Customer2, Customer2> itemProcessor(
+    public ScriptItemProcessor<Customer2, Customer2> lowerCaseItemProcessor(
             @Value("#{jobParameters['script']}") Resource script
     ){
         ScriptItemProcessor<Customer2, Customer2> itemProcessor = new ScriptItemProcessor<>();
@@ -75,6 +91,28 @@ public class ValidationJob {
 
         return itemProcessor;
 
+    }
+
+//    @Bean
+//    @StepScope
+//    public ScriptItemProcessor<Customer2, Customer2> itemProcessor(
+//            @Value("#{jobParameters['script']}") Resource script
+//    ){
+//        ScriptItemProcessor<Customer2, Customer2> itemProcessor = new ScriptItemProcessor<>();
+//        itemProcessor.setScript(script);
+//
+//        return itemProcessor;
+//
+//    }
+
+    @Bean
+    public ItemProcessorAdapter<Customer2,Customer2> upperCaseItemProcessor(UpperCaseNameService service){
+
+        ItemProcessorAdapter<Customer2,Customer2> adapter = new ItemProcessorAdapter<>();
+        adapter.setTargetObject(service);
+        adapter.setTargetMethod("upperCase");
+
+        return adapter;
     }
 
 //    @Bean
@@ -96,7 +134,9 @@ public class ValidationJob {
 
     @Bean
     public ValidatingItemProcessor<Customer2> customer2ValidatingItemProcessor(){
-        return new ValidatingItemProcessor<>(validator());
+        ValidatingItemProcessor<Customer2> itemProcessor = new ValidatingItemProcessor<>(validator());
+        itemProcessor.setFilter(true); // 필터링 예외 발생시 filter true이면 null 반환 그렇지 않으면 예외 발생
+        return itemProcessor;
     }
 
 //    @Bean
