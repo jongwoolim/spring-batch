@@ -64,9 +64,13 @@ public class FormattedTextFileJob {
         return new FlatFileItemWriterBuilder<Customer3>()
                 .name("customer3ItemWriter")
                 .resource(outputFile)
-                .formatted()
-                .format("%s %s lives at %s %s in %s, %s.")
-                .names(new String[]{"firstName","lastName","address","city","state","zip"})
+                // 구분자로 구분된 파일 , -> ;  DelimitedLineAggregator 사용
+                .delimited()
+                .delimiter(";")
+                .names(new String[]{"zip","state","city","address","lastName","firstName"})
+//                .formatted() FormatterLineAggregator 사용
+//                .format("%s %s lives at %s %s in %s, %s.")
+//                .names(new String[]{"firstName","lastName","address","city","state","zip"})
                 .build();
 
     }
