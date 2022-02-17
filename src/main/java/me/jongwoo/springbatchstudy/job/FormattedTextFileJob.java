@@ -7,6 +7,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -25,14 +26,15 @@ public class FormattedTextFileJob {
 
     @Bean
     public Job formatJob(){
-        return this.jobBuilderFactory.get("customer3Job")
+        return this.jobBuilderFactory.get("formatJob")
                 .start(formatStep())
+                .incrementer(new RunIdIncrementer())
                 .build();
     }
 
     @Bean
     public Step formatStep(){
-        return this.stepBuilderFactory.get("customer3Step")
+        return this.stepBuilderFactory.get("formatStep")
                 .<Customer3, Customer3>chunk(10)
                 .reader(customer3FileReader(null))
                 .writer(customer3ItemWriter(null))
