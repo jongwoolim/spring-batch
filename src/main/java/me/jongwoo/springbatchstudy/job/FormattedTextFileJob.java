@@ -43,7 +43,7 @@ public class FormattedTextFileJob {
         return this.stepBuilderFactory.get("formatStep")
                 .<Customer3, Customer3>chunk(10)
                 .reader(customer3FileReader(null))
-                .writer(delimitedCustomerItemWriter(null))
+                .writer(xmlCustomerWriter(null))
                 .build();
 
     }
