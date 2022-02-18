@@ -67,8 +67,9 @@ public class FormattedTextFileJob {
                 .delimited()
                 .delimiter(";")
                 .names(new String[]{"zip","state","city","address","lastName","firstName"})
-                .shouldDeleteIfExists(false)
+//                .shouldDeleteIfExists(false)
 //                .shouldDeleteIfEmpty(true) // 비어 있는 파일을 입력으로 전달하면 출력 파일 남지 않음 하지만 출력 파일이 생성되고 open, close가 수행된다
+                .append(true) // 여러 번 실행하더라도 동일한 출력 파일 사용
                 .build();
     }
 //    @Bean
