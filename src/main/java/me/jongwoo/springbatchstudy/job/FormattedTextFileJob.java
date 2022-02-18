@@ -12,10 +12,16 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.builder.FlatFileItemWriterBuilder;
+import org.springframework.batch.item.xml.StaxEventItemWriter;
+import org.springframework.batch.item.xml.builder.StaxEventItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.oxm.xstream.XStreamMarshaller;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
@@ -58,20 +64,43 @@ public class FormattedTextFileJob {
 
     @Bean
     @StepScope
-    public FlatFileItemWriter<Customer3> delimitedCustomerItemWriter(
-            @Value("#{jobParameters['outputFile']}") Resource outputFile
-    ){
-        return new FlatFileItemWriterBuilder<Customer3>()
+    public StaxEventItemWriter<Customer3> xmlCustomerWriter(
+            @Value("#{jobParameters['outputFile']}") Resource outputFile){
+
+        Map<String, Class> aliases = new HashMap<>();
+        aliases.put("customer", Customer3.class);
+
+        XStreamMarshaller marshaller = new XStreamMarshaller();
+
+        marshaller.setAliases(aliases);
+
+        marshaller.afterPropertiesSet();
+
+        return new StaxEventItemWriterBuilder<Customer3>()
                 .name("customerItemWriter")
                 .resource(outputFile)
-                .delimited()
-                .delimiter(";")
-                .names(new String[]{"zip","state","city","address","lastName","firstName"})
-//                .shouldDeleteIfExists(false)
-//                .shouldDeleteIfEmpty(true) // 비어 있는 파일을 입력으로 전달하면 출력 파일 남지 않음 하지만 출력 파일이 생성되고 open, close가 수행된다
-                .append(true) // 여러 번 실행하더라도 동일한 출력 파일 사용
+                .marshaller(marshaller)
+                .rootTagName("customers")
                 .build();
+
     }
+
+//    @Bean
+//    @StepScope
+//    public FlatFileItemWriter<Customer3> delimitedCustomerItemWriter(
+//            @Value("#{jobParameters['outputFile']}") Resource outputFile
+//    ){
+//        return new FlatFileItemWriterBuilder<Customer3>()
+//                .name("customerItemWriter")
+//                .resource(outputFile)
+//                .delimited()
+//                .delimiter(";")
+//                .names(new String[]{"zip","state","city","address","lastName","firstName"})
+////                .shouldDeleteIfExists(false)
+////                .shouldDeleteIfEmpty(true) // 비어 있는 파일을 입력으로 전달하면 출력 파일 남지 않음 하지만 출력 파일이 생성되고 open, close가 수행된다
+//                .append(true) // 여러 번 실행하더라도 동일한 출력 파일 사용
+//                .build();
+//    }
 //    @Bean
 //    @StepScope
 //    public FlatFileItemWriter<Customer3> customer3ItemWriter(
