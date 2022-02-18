@@ -67,7 +67,8 @@ public class FormattedTextFileJob {
                 .delimited()
                 .delimiter(";")
                 .names(new String[]{"zip","state","city","address","lastName","firstName"})
-                .shouldDeleteIfEmpty(true) // 비어 있는 파일을 입력으로 전달하면 출력 파일 남지 않음 하지만 출력 파일이 생성되고 open, close가 수행된다
+                .shouldDeleteIfExists(false)
+//                .shouldDeleteIfEmpty(true) // 비어 있는 파일을 입력으로 전달하면 출력 파일 남지 않음 하지만 출력 파일이 생성되고 open, close가 수행된다
                 .build();
     }
 //    @Bean
