@@ -37,7 +37,7 @@ public class FormattedTextFileJob {
         return this.stepBuilderFactory.get("formatStep")
                 .<Customer3, Customer3>chunk(10)
                 .reader(customer3FileReader(null))
-                .writer(customer3ItemWriter(null))
+                .writer(delimitedCustomerItemWriter(null))
                 .build();
 
     }
@@ -58,20 +58,34 @@ public class FormattedTextFileJob {
 
     @Bean
     @StepScope
-    public FlatFileItemWriter<Customer3> customer3ItemWriter(
+    public FlatFileItemWriter<Customer3> delimitedCustomerItemWriter(
             @Value("#{jobParameters['outputFile']}") Resource outputFile
     ){
         return new FlatFileItemWriterBuilder<Customer3>()
-                .name("customer3ItemWriter")
+                .name("customerItemWriter")
                 .resource(outputFile)
-                // 구분자로 구분된 파일 , -> ;  DelimitedLineAggregator 사용
                 .delimited()
                 .delimiter(";")
                 .names(new String[]{"zip","state","city","address","lastName","firstName"})
-//                .formatted() FormatterLineAggregator 사용
-//                .format("%s %s lives at %s %s in %s, %s.")
-//                .names(new String[]{"firstName","lastName","address","city","state","zip"})
+                .shouldDeleteIfEmpty(true) // 비어 있는 파일을 입력으로 전달하면 출력 파일 남지 않음 하지만 출력 파일이 생성되고 open, close가 수행된다
                 .build();
-
     }
+//    @Bean
+//    @StepScope
+//    public FlatFileItemWriter<Customer3> customer3ItemWriter(
+//            @Value("#{jobParameters['outputFile']}") Resource outputFile
+//    ){
+//        return new FlatFileItemWriterBuilder<Customer3>()
+//                .name("customer3ItemWriter")
+//                .resource(outputFile)
+//                // 구분자로 구분된 파일 , -> ;  DelimitedLineAggregator 사용
+//                .delimited()
+//                .delimiter(";")
+//                .names(new String[]{"zip","state","city","address","lastName","firstName"})
+////                .formatted() FormatterLineAggregator 사용
+////                .format("%s %s lives at %s %s in %s, %s.")
+////                .names(new String[]{"firstName","lastName","address","city","state","zip"})
+//                .build();
+//
+//    }
 }
