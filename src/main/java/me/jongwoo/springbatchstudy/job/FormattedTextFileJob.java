@@ -2,12 +2,15 @@ package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.domain.Customer3;
+import me.jongwoo.springbatchstudy.writer.CustomerItemPreparedStatementSetter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -20,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.xstream.XStreamMarshaller;
 
+import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +47,7 @@ public class FormattedTextFileJob {
         return this.stepBuilderFactory.get("formatStep")
                 .<Customer3, Customer3>chunk(10)
                 .reader(customer3FileReader(null))
-                .writer(xmlCustomerWriter(null))
+                .writer(jdbcBatchItemWriter(null))
                 .build();
 
     }
@@ -64,26 +68,42 @@ public class FormattedTextFileJob {
 
     @Bean
     @StepScope
-    public StaxEventItemWriter<Customer3> xmlCustomerWriter(
-            @Value("#{jobParameters['outputFile']}") Resource outputFile){
-
-        Map<String, Class> aliases = new HashMap<>();
-        aliases.put("customer", Customer3.class);
-
-        XStreamMarshaller marshaller = new XStreamMarshaller();
-
-        marshaller.setAliases(aliases);
-
-        marshaller.afterPropertiesSet();
-
-        return new StaxEventItemWriterBuilder<Customer3>()
-                .name("customerItemWriter")
-                .resource(outputFile)
-                .marshaller(marshaller)
-                .rootTagName("customers")
+    public JdbcBatchItemWriter<Customer3> jdbcBatchItemWriter(DataSource dataSource){
+        return new JdbcBatchItemWriterBuilder<Customer3>()
+                .dataSource(dataSource)
+                .sql("INSERT INTO CUSTOMER3 (first_name, " +
+                        "middle_initial, " +
+                        "last_name, " +
+                        "address, " +
+                        "city, " +
+                        "state, " +
+                        "zip) VALUES (?,?,?,?,?,?,?)")
+                .itemPreparedStatementSetter(new CustomerItemPreparedStatementSetter())
                 .build();
-
     }
+
+//    @Bean
+//    @StepScope
+//    public StaxEventItemWriter<Customer3> xmlCustomerWriter(
+//            @Value("#{jobParameters['outputFile']}") Resource outputFile){
+//
+//        Map<String, Class> aliases = new HashMap<>();
+//        aliases.put("customer", Customer3.class);
+//
+//        XStreamMarshaller marshaller = new XStreamMarshaller();
+//
+//        marshaller.setAliases(aliases);
+//
+//        marshaller.afterPropertiesSet();
+//
+//        return new StaxEventItemWriterBuilder<Customer3>()
+//                .name("customerItemWriter")
+//                .resource(outputFile)
+//                .marshaller(marshaller)
+//                .rootTagName("customers")
+//                .build();
+//
+//    }
 
 //    @Bean
 //    @StepScope
