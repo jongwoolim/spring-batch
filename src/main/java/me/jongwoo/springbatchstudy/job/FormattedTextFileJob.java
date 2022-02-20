@@ -77,8 +77,9 @@ public class FormattedTextFileJob {
                         "address, " +
                         "city, " +
                         "state, " +
-                        "zip) VALUES (?,?,?,?,?,?,?)")
-                .itemPreparedStatementSetter(new CustomerItemPreparedStatementSetter())
+                        "zip) VALUES (:firstName, :middleInitial, :lastName, :address, :city, :state, :zip)")
+//                .itemPreparedStatementSetter(new CustomerItemPreparedStatementSetter())
+                .beanMapped()
                 .build();
     }
 
