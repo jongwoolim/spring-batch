@@ -1,13 +1,14 @@
-package me.jongwoo.springbatchstudy.domain;
+package me.jongwoo.springbatchstudy.repository;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity @Data
-public class Customer4 {
+public class Customer4 implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

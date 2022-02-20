@@ -23,6 +23,7 @@ import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
 import org.springframework.batch.item.file.transform.LineTokenizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class AccountJob {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
-    private final AccountRepository accounutRepository;
+//    private final AccountRepository accountRepository;
 
     @Bean
     public Job copyFileJob() {

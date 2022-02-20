@@ -2,50 +2,49 @@ package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.repository.Customer4;
+import me.jongwoo.springbatchstudy.repository.Customer4Repository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.database.JpaItemWriter;
-import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
+import org.springframework.batch.item.data.RepositoryItemWriter;
+import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
-
-import javax.persistence.EntityManagerFactory;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
 @RequiredArgsConstructor
-public class JpaImportJob {
+@EnableJpaRepositories(basePackageClasses = Customer4.class)
+public class RepositoryImportJob {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job jpaFormatJob(){
-        return this.jobBuilderFactory.get("jpaFormatJob")
-                .start(jpaFormatStep())
-                .incrementer(new RunIdIncrementer())
+    public Job repositoryFormatJob(){
+        return this.jobBuilderFactory.get("repositoryFormatJob")
+                .start(repositoryFormatStep())
                 .build();
     }
 
     @Bean
-    public Step jpaFormatStep() {
-        return this.stepBuilderFactory.get("jpaFormatStep")
+    public Step repositoryFormatStep() {
+        return this.stepBuilderFactory.get("repositoryFormatStep")
                 .<Customer4, Customer4>chunk(10)
-                .reader(customer4FlatFileItemReader2(null))
-                .writer(jpaItemWriter(null))
+                .reader(customer4FlatFileItemReader3(null))
+                .writer(repositoryItemWriter(null))
                 .build();
     }
 
     @Bean
     @StepScope
-    public FlatFileItemReader<Customer4> customer4FlatFileItemReader2(
+    public FlatFileItemReader<Customer4> customer4FlatFileItemReader3(
             @Value("#{jobParameters['customerFile']}") Resource inputFile
     ){
                 return new FlatFileItemReaderBuilder<Customer4>()
@@ -58,10 +57,11 @@ public class JpaImportJob {
     }
 
     @Bean
-    public JpaItemWriter<Customer4> jpaItemWriter(EntityManagerFactory entityManagerFactory){
+    public RepositoryItemWriter<Customer4> repositoryItemWriter(Customer4Repository repository){
 
-        return new JpaItemWriterBuilder<Customer4>()
-                .entityManagerFactory(entityManagerFactory)
+        return new RepositoryItemWriterBuilder<Customer4>()
+                .repository(repository)
+                .methodName("save")
                 .build();
     }
 }

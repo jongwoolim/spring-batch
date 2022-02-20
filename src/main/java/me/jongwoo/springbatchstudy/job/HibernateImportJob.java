@@ -1,14 +1,13 @@
 package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
-import me.jongwoo.springbatchstudy.domain.Customer4;
+import me.jongwoo.springbatchstudy.repository.Customer4;
 import org.hibernate.SessionFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.database.HibernateItemWriter;
 import org.springframework.batch.item.database.builder.HibernateItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;

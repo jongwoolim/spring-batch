@@ -1,5 +1,6 @@
 package me.jongwoo.springbatchstudy;
 
+import me.jongwoo.springbatchstudy.domain.Customer;
 import me.jongwoo.springbatchstudy.repository.CustomerRepository;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
@@ -8,13 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AppRunner implements ApplicationRunner {
 
-    @Autowired
-    private CustomerRepository customerRepository;
+//    @Autowired
+//    private CustomerRepository customerRepository;
 
     @Autowired
     ApplicationContext applicationContext;
