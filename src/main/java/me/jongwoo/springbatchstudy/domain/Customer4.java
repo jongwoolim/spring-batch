@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@Entity
+@Entity @Data
 public class Customer4 {
 
     private static final long serialVersionUID = 1L;
