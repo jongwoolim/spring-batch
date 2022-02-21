@@ -21,4 +21,5 @@ public class Customer4 implements Serializable{
     private String city;
     private String state;
     private String zip;
+    private String email;
 }
