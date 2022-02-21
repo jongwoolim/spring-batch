@@ -19,9 +19,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.MessageType;
 import org.springframework.oxm.xstream.XStreamMarshaller;
 
+import javax.jms.ConnectionFactory;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +36,32 @@ public class JmsJob {
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
+
+	// 스프링 인티그레이션은 자바 직렬화를 통해 자체적으로 Message 객체를 직렬화 함
+	// 그러나 이 기능은 유용하지 않아 액티브MQ의 지점 간 전송에 메시지가 JSON 전달되도록 변환 구성
+	@Bean
+	public MessageConverter jacksonJmsMessageConverter(){
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+
+		converter.setTargetType(MessageType.TEXT);
+		converter.setTypeIdPropertyName("_type");
+		return converter;
+	}
+
+	// 스프링 부트가 JmsTemplate을 제공하지만
+	// 스프링 부트가 제공하는 ConnectionFactory는 JmsTemplate과 잘 동작하지 않음
+	// CachingConnectionFactory를 통해 JmsTemplate 구성
+	@Bean
+	public JmsTemplate jmsTemplate(ConnectionFactory connectionFactory){
+		CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(connectionFactory);
+		cachingConnectionFactory.afterPropertiesSet();
+
+		JmsTemplate jmsTemplate = new JmsTemplate(cachingConnectionFactory);
+		jmsTemplate.setDefaultDestinationName("customers");
+		jmsTemplate.setReceiveTimeout(5000L);
+
+		return jmsTemplate;
+	}
 
     @Bean
 	public Job jmsFormatJob() throws Exception {
@@ -109,6 +140,7 @@ public class JmsJob {
 
 		XStreamMarshaller marshaller = new XStreamMarshaller();
 		marshaller.setAliases(aliases);
+		marshaller.afterPropertiesSet();
 
 		return new StaxEventItemWriterBuilder<Customer4>()
 				.name("xmlOutputWriter")

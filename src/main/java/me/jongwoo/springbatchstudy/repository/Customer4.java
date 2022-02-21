@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity @Data
-public class Customer4 implements Serializable {
+public class Customer4 implements Serializable{
 
     private static final long serialVersionUID = 1L;
 
