@@ -3,11 +3,13 @@ package me.jongwoo.springbatchstudy.job;
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.repository.Customer4;
 import me.jongwoo.springbatchstudy.repository.Customer4Repository;
+import me.jongwoo.springbatchstudy.service.CustomService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.adapter.ItemWriterAdapter;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -38,7 +40,7 @@ public class RepositoryImportJob {
         return this.stepBuilderFactory.get("repositoryFormatStep")
                 .<Customer4, Customer4>chunk(10)
                 .reader(customer4FlatFileItemReader3(null))
-                .writer(repositoryItemWriter(null))
+                .writer(itemWriterAdapter(null))
                 .build();
     }
 
@@ -56,12 +58,23 @@ public class RepositoryImportJob {
                         .build();
     }
 
-    @Bean
-    public RepositoryItemWriter<Customer4> repositoryItemWriter(Customer4Repository repository){
+//    @Bean
+//    public RepositoryItemWriter<Customer4> repositoryItemWriter(Customer4Repository repository){
+//
+//        return new RepositoryItemWriterBuilder<Customer4>()
+//                .repository(repository)
+//                .methodName("save")
+//                .build();
+//    }
 
-        return new RepositoryItemWriterBuilder<Customer4>()
-                .repository(repository)
-                .methodName("save")
-                .build();
+    @Bean
+    public ItemWriterAdapter<Customer4> itemWriterAdapter(CustomService customeService){
+        ItemWriterAdapter<Customer4> customer4ItemWriterAdapter = new ItemWriterAdapter<>();
+
+        customer4ItemWriterAdapter.setTargetObject(customeService);
+        customer4ItemWriterAdapter.setTargetMethod("logCustomer");
+
+        return customer4ItemWriterAdapter;
+
     }
 }
