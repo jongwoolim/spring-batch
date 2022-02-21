@@ -14,4 +14,8 @@ public class CustomService {
     public void logCustomer(Customer4 cust){
         System.out.println("i just saved " + cust);
     }
+
+    public void logCustomerAddress(String address, String city, String state, String zip){
+        System.out.println(String.format("i just saved the address:\n%s\n%s, %s\n%s", address, city, state, zip));
+    }
 }

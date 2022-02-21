@@ -10,6 +10,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.adapter.ItemWriterAdapter;
+import org.springframework.batch.item.adapter.PropertyExtractingDelegatingItemWriter;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.data.builder.RepositoryItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -68,13 +69,26 @@ public class RepositoryImportJob {
 //    }
 
     @Bean
-    public ItemWriterAdapter<Customer4> itemWriterAdapter(CustomService customeService){
-        ItemWriterAdapter<Customer4> customer4ItemWriterAdapter = new ItemWriterAdapter<>();
+    public PropertyExtractingDelegatingItemWriter<Customer4> itemWriterAdapter(CustomService customeService){
+        PropertyExtractingDelegatingItemWriter<Customer4> itemWriter =
+                new PropertyExtractingDelegatingItemWriter<>();
 
-        customer4ItemWriterAdapter.setTargetObject(customeService);
-        customer4ItemWriterAdapter.setTargetMethod("logCustomer");
+        itemWriter.setTargetObject(customeService);
+        itemWriter.setTargetMethod("logCustomerAddress");
+        itemWriter.setFieldsUsedAsTargetMethodArguments(new String[]{"address","city","state","zip"});
 
-        return customer4ItemWriterAdapter;
+        return itemWriter;
 
     }
+
+//    @Bean
+//    public ItemWriterAdapter<Customer4> itemWriterAdapter(CustomService customeService){
+//        ItemWriterAdapter<Customer4> customer4ItemWriterAdapter = new ItemWriterAdapter<>();
+//
+//        customer4ItemWriterAdapter.setTargetObject(customeService);
+//        customer4ItemWriterAdapter.setTargetMethod("logCustomer");
+//
+//        return customer4ItemWriterAdapter;
+//
+//    }
 }
