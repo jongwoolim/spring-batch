@@ -1,6 +1,7 @@
 package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
+import me.jongwoo.springbatchstudy.batch.CustomerOutputFileSuffixCreator;
 import me.jongwoo.springbatchstudy.repository.Customer4;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -42,13 +43,15 @@ public class MultiResourceJob {
 	}
 
 	@Bean
-	public MultiResourceItemWriter<Customer4> multiCustomerFileWriter() throws Exception {
+	public MultiResourceItemWriter<Customer4> multiCustomerFileWriter(
+			CustomerOutputFileSuffixCreator suffixCreator) throws Exception {
 
 		return new MultiResourceItemWriterBuilder<Customer4>()
 				.name("multiCustomerFileWriter")
 				.delegate(delegateItemWriter()) // 각 아이템을 쓰는 데 사용하는 위임 ItemWriter
 				.itemCountLimitPerResource(25) // 각 리소스에 쓰기 작업을 수행할 아이템 수
 				.resource(new FileSystemResource("/Users/limjongwoo/Desktop/output/customer")) // 디렉터리와 파일 이름
+				.resourceSuffixCreator(suffixCreator)
 				.build();
 	}
 
@@ -77,7 +80,7 @@ public class MultiResourceJob {
 		return this.stepBuilderFactory.get("multiXmlGeneratorStep")
 				.<Customer4, Customer4>chunk(10)
 				.reader(customer4JdbcCursorItemReader2(null))
-				.writer(multiCustomerFileWriter())
+				.writer(multiCustomerFileWriter(null))
 				.build();
 	}
 
