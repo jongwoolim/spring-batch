@@ -2,20 +2,25 @@ package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.repository.Customer4;
+import me.jongwoo.springbatchstudy.writer.CustomerClassifier;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.support.ClassifierCompositeItemWriter;
 import org.springframework.batch.item.support.CompositeItemWriter;
+import org.springframework.batch.item.support.builder.ClassifierCompositeItemWriterBuilder;
 import org.springframework.batch.item.support.builder.CompositeItemWriterBuilder;
 import org.springframework.batch.item.xml.StaxEventItemWriter;
 import org.springframework.batch.item.xml.builder.StaxEventItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.classify.Classifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
@@ -46,7 +51,9 @@ public class CompositeItemWriterJob {
 		return this.stepBuilderFactory.get("compositeWriterStep")
 				.<Customer4, Customer4>chunk(10)
 				.reader(compositewriterItemReader(null))
-				.writer(compositeItemWriter())
+                .writer(classifierCompositeItemWriter())
+//				.writer(compositeItemWriter())
+                .stream(xmlDelegateItemWrtier(null))
 				.build();
 	}
 
@@ -119,6 +126,15 @@ public class CompositeItemWriterJob {
                 .build();
     }
 
+    @Bean
+    public ClassifierCompositeItemWriter<Customer4> classifierCompositeItemWriter(){
+        Classifier<Customer4, ItemWriter<? super Customer4>> classifier =
+                new CustomerClassifier(xmlDelegateItemWrtier(null), jdbcDelgateItemWriter(null));
+
+        return new ClassifierCompositeItemWriterBuilder<Customer4>()
+                .classifier(classifier)
+                .build();
+    }
 
 
 }
