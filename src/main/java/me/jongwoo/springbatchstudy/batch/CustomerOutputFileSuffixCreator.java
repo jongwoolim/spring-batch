@@ -9,6 +9,6 @@ public class CustomerOutputFileSuffixCreator implements ResourceSuffixCreator {
     @Override
     public String getSuffix(int i) {
         // 파일 이름 끝에 붙힐 접미사
-        return i + ".xml";
+        return i + ".csv";
     }
 }
