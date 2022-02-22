@@ -51,7 +51,7 @@ public class MultiResourceJob {
 				.delegate(delegateItemWriter()) // 각 아이템을 쓰는 데 사용하는 위임 ItemWriter
 				.itemCountLimitPerResource(25) // 각 리소스에 쓰기 작업을 수행할 아이템 수
 				.resource(new FileSystemResource("/Users/limjongwoo/Desktop/output/customer")) // 디렉터리와 파일 이름
-				.resourceSuffixCreator(suffixCreator)
+				.resourceSuffixCreator(suffixCreator) // 생성하는 파일 이름 끝에 접미사
 				.build();
 	}
 
