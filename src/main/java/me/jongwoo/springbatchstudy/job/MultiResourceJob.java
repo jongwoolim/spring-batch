@@ -2,6 +2,7 @@ package me.jongwoo.springbatchstudy.job;
 
 import lombok.RequiredArgsConstructor;
 import me.jongwoo.springbatchstudy.batch.CustomerOutputFileSuffixCreator;
+import me.jongwoo.springbatchstudy.batch.CustomerXmlHeaderCallback;
 import me.jongwoo.springbatchstudy.repository.Customer4;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -48,7 +49,7 @@ public class MultiResourceJob {
 
 		return new MultiResourceItemWriterBuilder<Customer4>()
 				.name("multiCustomerFileWriter")
-				.delegate(delegateItemWriter()) // 각 아이템을 쓰는 데 사용하는 위임 ItemWriter
+				.delegate(delegateItemWriter(null)) // 각 아이템을 쓰는 데 사용하는 위임 ItemWriter
 				.itemCountLimitPerResource(25) // 각 리소스에 쓰기 작업을 수행할 아이템 수
 				.resource(new FileSystemResource("/Users/limjongwoo/Desktop/output/customer")) // 디렉터리와 파일 이름
 				.resourceSuffixCreator(suffixCreator) // 생성하는 파일 이름 끝에 접미사
@@ -57,7 +58,9 @@ public class MultiResourceJob {
 
 	@Bean
 	@StepScope
-	public StaxEventItemWriter<Customer4> delegateItemWriter() throws Exception {
+	public StaxEventItemWriter<Customer4> delegateItemWriter(
+			CustomerXmlHeaderCallback headerCallback
+	) throws Exception {
 
 		Map<String, Class> aliases = new HashMap<>();
 		aliases.put("customer", Customer4.class);
@@ -72,6 +75,7 @@ public class MultiResourceJob {
 				.name("customerItemWriter")
 				.marshaller(marshaller)
 				.rootTagName("customers")
+				.headerCallback(headerCallback)
 				.build();
 	}
 
